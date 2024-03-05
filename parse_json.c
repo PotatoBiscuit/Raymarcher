@@ -1,9 +1,9 @@
 #include <ctype.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "math_utility.h"
 #include "parse_json.h"
 
 int line = 1;	//Line currently being parsed
@@ -104,17 +104,6 @@ double* next_vector(FILE* json) {	//parse the next vector, and return it in doub
 	skip_ws(json);
 	expect_c(json, ']');
 	return v;
-}
-
-double degrees_to_radians(double value){	//Converts input from degrees to radians
-	return 2*M_PI*value/360;
-}
-
-void normalize(double* vector) {
-    double length = sqrt(vector[0]*vector[0] + vector[1]*vector[1] + vector[2]*vector[2]);
-    vector[0] /= length;
-    vector[1] /= length;
-    vector[2] /= length;
 }
 
 //This function takes an input value or vector, and puts it into our object array

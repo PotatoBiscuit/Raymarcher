@@ -1,7 +1,5 @@
-#ifndef JSON_PARSE_HEADER
-#define JSON_PARSE_HEADER
-
-#define M_PI  3.14159265358979323846
+#ifndef PARSE_JSON
+#define PARSE_JSON
 
 typedef struct {	//Create structure to be used for our object_array
   int kind; // 0 = camera, 1 = sphere, 2 = plane, 3 = light
