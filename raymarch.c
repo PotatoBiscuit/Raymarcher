@@ -13,6 +13,8 @@ typedef struct{	//Holds object intersection information
 } Tuple;
 
 #define MAX_RECURSION 7
+#define INTERSECTION_LIMIT .0001
+#define OUTER_BOUNDS 1000000
 
 void argument_checker(int c, char** argv){	//Check input arguments for validity
 	int i = 0;
@@ -63,19 +65,59 @@ void argument_checker(int c, char** argv){	//Check input arguments for validity
 	}
 }
 
+double sphere_intersection(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
+    double distance = distance_between(sphere_position, position);
+    return distance - radius;
+}
+
 Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){	//Find object intersections
 	Tuple* intersection = malloc(sizeof(Tuple));
 	int parse_count = 1;
-	double best_t = INFINITY;
+	double closest_distance = INFINITY;
 	int best_index = -1;
-	double t = 0;
+
+    double temp_ray_position[3] = {Ro[0], Ro[1], Ro[2]};
 	
-	while(parse_count < object_counter + 1){	//Iterate through object array and test for intersections
-		//do the raymarching with a ray
-		parse_count++;
-	}
+    while(1){
+        double temp_distance = INFINITY;
+        double temp_min_distance = INFINITY;
+        while(parse_count < object_counter + 1){	//do the raymarching with a ray
+
+            if(object_array[parse_count]->kind == 1){	//See if a sphere overshadows our point of intersection
+                temp_distance = sphere_intersection(temp_ray_position, object_array[parse_count]->sphere.position,
+                            object_array[parse_count]->sphere.radius);
+                if( temp_distance > 0 ) {
+                    temp_min_distance = min( temp_distance, temp_min_distance );
+                    best_index = parse_count;
+                }
+
+            }else if(object_array[parse_count]->kind == 2){ //See if a plane overshadows our point of intersection
+                //plane intersection
+            }else{	//If a light was found, skip it
+                //do nothing
+            }
+
+            parse_count++;
+	    }
+
+        temp_ray_position[0] += Rd[0]*temp_min_distance;
+        temp_ray_position[1] += Rd[1]*temp_min_distance;
+        temp_ray_position[2] += Rd[2]*temp_min_distance;
+        if( temp_min_distance < INTERSECTION_LIMIT || temp_min_distance > OUTER_BOUNDS ) {
+            if( temp_min_distance > OUTER_BOUNDS ) {
+                closest_distance = -1;
+            }
+            else if( object_array[best_index]->kind == 1 ){
+                closest_distance = sphere_intersection(Ro, object_array[best_index]->sphere.position,
+                    object_array[best_index]->sphere.radius);
+            }
+            break;
+        }
+        parse_count = 1;
+    }
+
 	intersection->best_index = best_index;
-	intersection->best_t = best_t;
+	intersection->best_t = closest_distance;
 	return intersection;
 }
 
@@ -122,16 +164,19 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
 				//render color here
-                color = malloc(sizeof(double)*3);
                 color[0] = 0;
                 color[1] = 0;
                 color[2] = 0;
+                if( intersection->best_t > 0 ){
+                    color[0] = 155;
+                    color[1] = 155;
+                    color[2] = 155;
+                }
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][2] = color[2];
 				
-				free(color);
 				parse_count = 1;
 			}else{
 				parse_count = 1;
@@ -206,6 +251,6 @@ void main(int c, char** argv){
 	object_counter = read_scene(argv[3], object_array);	//Parse .json scene file
 	move_camera_to_front(object_array, object_counter);	//Make camera the first object in our object array
 	raymarch_scene(object_array, object_counter, pixel_buffer, width, height);	//Raycast our scene into the pixel array
-	//create_image(pixel_buffer, argv[4], width, height);	//Put info from pixel array into a P6 PPM file
+	create_image(pixel_buffer, argv[4], width, height);	//Put info from pixel array into a P6 PPM file
     return;
 }
