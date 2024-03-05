@@ -7,5 +7,6 @@
 #include "parse_json.h"
 
 void main(char** argv){
+    printf("This is a placeholder right now\n");
     return;
 }
