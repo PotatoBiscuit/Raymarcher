@@ -10,8 +10,8 @@
     "diffuse_color": [1, 0, 0],
     "specular_color": [1, 1, 1],
     "ior": 1,
-    "reflectivity": .5,
-    "refractivity": .5,
+    "reflectivity": 0.5,
+    "refractivity": 0.5,
     "position": [0, 0, 3]
 },
 {
@@ -19,7 +19,7 @@
     "normal": [0, 1, 0],
     "diffuse_color": [0, 1, 0],
     "specular_color": [1, 1, 1],
-    "reflectivity": .5,
+    "reflectivity": 0.5,
     "refractivity": 0,
     "position": [0, -1, 0]
 },
