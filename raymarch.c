@@ -6,15 +6,7 @@
 
 #include "math_utility.h"
 #include "parse_json.h"
-
-typedef struct{	//Holds object intersection information
-	int best_index;
-	double best_t;
-} Tuple;
-
-#define MAX_RECURSION 7
-#define INTERSECTION_LIMIT .0001
-#define OUTER_BOUNDS 1000000
+#include "raymarch.h"
 
 void argument_checker(int c, char** argv){	//Check input arguments for validity
 	int i = 0;
@@ -83,15 +75,15 @@ Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){
         double temp_min_distance = INFINITY;
         while(parse_count < object_counter + 1){	//do the raymarching with a ray
 
-            if(object_array[parse_count]->kind == 1){	//See if a sphere overshadows our point of intersection
+            if(object_array[parse_count]->kind == Sphere){	//See if a sphere overshadows our point of intersection
                 temp_distance = sphere_intersection(temp_ray_position, object_array[parse_count]->sphere.position,
                             object_array[parse_count]->sphere.radius);
-                if( temp_distance > 0 ) {
+                if( temp_distance >= 0 ) {
                     temp_min_distance = min( temp_distance, temp_min_distance );
                     best_index = parse_count;
                 }
 
-            }else if(object_array[parse_count]->kind == 2){ //See if a plane overshadows our point of intersection
+            }else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
                 //plane intersection
             }else{	//If a light was found, skip it
                 //do nothing
@@ -107,7 +99,7 @@ Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){
             if( temp_min_distance > OUTER_BOUNDS ) {
                 closest_distance = -1;
             }
-            else if( object_array[best_index]->kind == 1 ){
+            else if( object_array[best_index]->kind == Sphere ){
                 closest_distance = sphere_intersection(Ro, object_array[best_index]->sphere.position,
                     object_array[best_index]->sphere.radius);
             }
@@ -119,6 +111,12 @@ Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){
 	intersection->best_index = best_index;
 	intersection->best_t = closest_distance;
 	return intersection;
+}
+
+void calculate_color(double* color, Tuple* intersection){
+	color[0] = 155;
+	color[1] = 155;
+	color[2] = 155;
 }
 
 void raymarch_scene(Object** object_array, int object_counter, double** pixel_buffer, int N, int M){	//This raymarches our object_array
@@ -136,7 +134,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 	double pixheight;
 	Tuple* intersection;
 	
-	if(object_array[parse_count]->kind != 0){	//If camera is not present, throw an error
+	if(object_array[parse_count]->kind != Camera){	//If camera is not present, throw an error
 		fprintf(stderr, "Error: You must have one object of type camera\n");
 		exit(1);
 	}
@@ -163,15 +161,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
-				//render color here
-                color[0] = 0;
-                color[1] = 0;
-                color[2] = 0;
-                if( intersection->best_t > 0 ){
-                    color[0] = 155;
-                    color[1] = 155;
-                    color[2] = 155;
-                }
+				calculate_color(color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];
@@ -209,9 +199,9 @@ void move_camera_to_front(Object** object_array, int object_count){	//Moves came
 	int counter = 0;
 	int num_cameras = 0;
 	while(counter < object_count + 1){	//Iterate through all objects in object_array
-		if(object_array[counter]->kind == 0 && counter == 0){	//If first object is a camera, do nothing
+		if(object_array[counter]->kind == Camera && counter == 0){	//If first object is a camera, do nothing
 			num_cameras++;
-		}else if(object_array[counter]->kind == 0){		//If a camera is found further in the array, switch first object with it
+		}else if(object_array[counter]->kind == Camera){		//If a camera is found further in the array, switch first object with it
 			if((++num_cameras) > 1){	//But, if two cameras are ever found, throw an error
 				fprintf(stderr, "Error: You may only have one camera in your .json file\n");
 				exit(1);

@@ -1,8 +1,10 @@
 #ifndef PARSE_JSON
 #define PARSE_JSON
 
+typedef enum { Camera, Sphere, Plane, Light, Box } Primitive;
+
 typedef struct {	//Create structure to be used for our object_array
-  int kind; // 0 = camera, 1 = sphere, 2 = plane, 3 = light
+  Primitive kind; // 0 = camera, 1 = sphere, 2 = plane, 3 = light
   union {
     struct {
       double width;

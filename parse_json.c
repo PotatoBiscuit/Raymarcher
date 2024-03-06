@@ -112,7 +112,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 	//7 = radial_a0, 8 = radial_a1, 9 = radial_a2, 10 = angular_a0, 11 = color, 12 = direction, 13 = theta
 	//14 = reflectivity, 15 = refractivity, 16 = ior
 	//if input_value or input_vector aren't used, a 0 or NULL value should be passed in
-	if(input_object->kind == 0){	//If the object is a camera, store the input into its width or height fields
+	if(input_object->kind == Camera){	//If the object is a camera, store the input into its width or height fields
 		if(type_of_field == 0){
 			if(input_value <= 0){
 				fprintf(stderr, "Error: Camera width must be greater than 0, line:%d\n", line);
@@ -129,7 +129,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			fprintf(stderr, "Error: Camera may only have 'width' or 'height' fields, line:%d\n", line);
 			exit(1);
 		}
-	}else if(input_object->kind == 1){	//If the object is a sphere, store input into its respective fields
+	}else if(input_object->kind == Sphere){	//If the object is a sphere, store input into its respective fields
 		if(type_of_field == 2){
 			input_object->sphere.radius = input_value;
 		}else if(type_of_field == 3){
@@ -179,7 +179,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			fprintf(stderr, "Error: Spheres only have 'radius', 'specular_color', 'diffuse_color', or 'position' fields, line:%d\n", line);
 			exit(1);
 		}
-	}else if(input_object->kind == 2){	//If the object is a plane, store input into its respective fields
+	}else if(input_object->kind == Plane){	//If the object is a plane, store input into its respective fields
 		if(type_of_field == 3){
 			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
 				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
@@ -238,7 +238,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			fprintf(stderr, "Error: Planes only have 'radius', 'specular_color', 'diffuse_color', or 'normal' fields, line:%d\n", line);
 			exit(1);
 		}
-	}else if(input_object->kind == 3){	//If object is a light, store input into its respective fields
+	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
 		if(type_of_field == 5){
 			input_object->light.position[0] = input_vector[0];
 			input_object->light.position[1] = input_vector[1];
@@ -330,25 +330,25 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
         char* value = next_string(json);
 
         if (strcmp(value, "camera") == 0) {
-            object_array[object_counter]->kind = 0;	//If camera, set object kind to 0
+            object_array[object_counter]->kind = Camera;
             width = 1;
             height = 1;
         } else if (strcmp(value, "sphere") == 0) {
-            object_array[object_counter]->kind = 1;	//If sphere, set object kind to 1
+            object_array[object_counter]->kind = Sphere;
             position = 1;
             radius = 1;
             specular_color = 1;
             diffuse_color = 1;
             ior = 1;
         } else if (strcmp(value, "plane") == 0) {
-            object_array[object_counter]->kind = 2;	//If plane, set object kind to 2
+            object_array[object_counter]->kind = Plane;
             position = 1;
             normal = 1;
             specular_color = 1;
             diffuse_color = 1;
             ior = 1;
-        } else if (strcmp(value, "light") == 0){		//If light, set object kind to 3
-            object_array[object_counter]->kind = 3;
+        } else if (strcmp(value, "light") == 0){
+            object_array[object_counter]->kind = Light;
             position = 1;
             color = 1;
             radial_a0 = 1;
