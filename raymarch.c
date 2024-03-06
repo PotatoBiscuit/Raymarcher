@@ -128,14 +128,30 @@ void intersect_normal( double* normal, double* intersect_pos, Object* object ){
 	}
 }
 
-void calculate_color(Object** object_array, double* color, Intersect* intersection){
+double* find_light_pos( Object** object_array, int object_counter ){ // Just find 1 light for now
+	int parse_count = 1;
+	while(parse_count++ < object_counter + 1){
+		if(object_array[parse_count]->kind == Light) {
+			return object_array[parse_count]->light.position;
+		}
+	}
+}
+
+void calculate_color( Object** object_array, int object_counter, double* color, Intersect* intersection ){
 	double normal[3] = {0.0, 0.0, 0.0};
 	intersect_normal(normal, intersection->position, object_array[intersection->best_index]);
-	vector_mult( normal, .5 );
-	vector_add( normal, .5 );
-	color[0] = normal[0];
-	color[1] = normal[1];
-	color[2] = normal[2];
+
+	double* light_pos = find_light_pos( object_array, object_counter );
+
+	double light_direction[3];
+	light_direction[0] = intersection->position[0] - light_pos[0];
+	light_direction[1] = intersection->position[1] - light_pos[1];
+	light_direction[2] = intersection->position[2] - light_pos[2];
+	normalize( light_direction );
+
+	double diffuse_intensity = clamp( dot_product( normal, light_direction ) );
+
+	color[0] = diffuse_intensity;
 }
 
 void raymarch_scene(Object** object_array, int object_counter, double** pixel_buffer, int N, int M){	//This raymarches our object_array
@@ -144,7 +160,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 	int i;
 	double Ro[3];
 	double Rd[3];
-	double* color;
+	double color[3];
 	double cx = 0;
 	double cy = 0;
 	double w;
@@ -170,7 +186,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 	Ro[1] = 0;
 	Ro[2] = 0;
 	
-	for(int y = 0; y < M; y += 1){	//Raycast every shape for each pixel
+	for(int y = 0; y < M; y += 1){	//Raymarch for every pixel
 		for(int x = 0; x < N; x += 1){
 			Rd[0] = cx - (w/2) + pixwidth * (x + .5);	//Create direction vector
 			Rd[1] = cy - (h/2) + pixheight * (y + .5);
@@ -180,7 +196,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
-				calculate_color(object_array, color, intersection);
+				calculate_color(object_array, object_counter, color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];

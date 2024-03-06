@@ -8,6 +8,7 @@ double sqr( double v );
 double degrees_to_radians( double value );
 double magnitude( double* input_vector );
 double distance_between(double* vector1, double* vector2 );
+double dot_product( double* v1, double* v2 );
 void normalize( double* vector );
 double simplify( double input );
 double clamp( double input );

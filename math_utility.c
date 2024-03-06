@@ -24,6 +24,10 @@ double distance_between(double* vector1, double* vector2 ){
 	return sqrt(sqr(vector1[0] - vector2[0]) + sqr(vector1[1] - vector2[1]) + sqr(vector1[2] - vector2[2]));
 }
 
+double dot_product( double* x_array, double* y_array ){
+	return x_array[0]*y_array[0] + x_array[1]*y_array[1] + x_array[2]*y_array[2];
+}
+
 void normalize(double* vector) {
     double length = magnitude(vector);
     vector[0] /= length;
