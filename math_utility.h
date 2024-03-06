@@ -12,4 +12,7 @@ void normalize( double* vector );
 double simplify( double input );
 double clamp( double input );
 
+void vector_add( double* input, double num );
+void vector_mult( double* input, double num );
+
 #endif

@@ -40,3 +40,15 @@ double clamp(double input){		//Return 1 if the input is above one, and return 0 
 	if(input < 0) return 0;
 	return input;
 }
+
+void vector_add( double* input, double num ){
+	input[0] += num;
+	input[1] += num;
+	input[2] += num;
+}
+
+void vector_mult( double* input, double num ){
+	input[0] *= num;
+	input[1] *= num;
+	input[2] *= num;
+}

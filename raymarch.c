@@ -62,8 +62,8 @@ double sphere_intersection(double* position, double* sphere_position, double rad
     return distance - radius;
 }
 
-Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){	//Find object intersections
-	Tuple* intersection = malloc(sizeof(Tuple));
+Intersect* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){	//Find object intersections
+	Intersect* intersection = malloc(sizeof(Intersect));
 	int parse_count = 1;
 	double closest_distance = INFINITY;
 	int best_index = -1;
@@ -110,13 +110,32 @@ Tuple* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){
 
 	intersection->best_index = best_index;
 	intersection->best_t = closest_distance;
+	intersection->position[0] = temp_ray_position[0];
+	intersection->position[1] = temp_ray_position[1];
+	intersection->position[2] = temp_ray_position[2];
 	return intersection;
 }
 
-void calculate_color(double* color, Tuple* intersection){
-	color[0] = 155;
-	color[1] = 155;
-	color[2] = 155;
+void intersect_normal( double* normal, double* intersect_pos, Object* object ){
+	if( object->kind == Sphere ){
+		normal[0] = intersect_pos[0] - object->sphere.position[0];
+		normal[1] = intersect_pos[1] - object->sphere.position[1];
+		normal[2] = intersect_pos[2] - object->sphere.position[2];
+		normalize(normal);
+	}
+	else{
+		//handle more primitives in the future
+	}
+}
+
+void calculate_color(Object** object_array, double* color, Intersect* intersection){
+	double normal[3] = {0.0, 0.0, 0.0};
+	intersect_normal(normal, intersection->position, object_array[intersection->best_index]);
+	vector_mult(normal, 0.5);
+	vector_add(normal, 0.5);
+	color[0] = (int)(normal[0] * COLOR_LIMIT);
+	color[1] = (int)(normal[1] * COLOR_LIMIT);
+	color[2] = (int)(normal[2] * COLOR_LIMIT);
 }
 
 void raymarch_scene(Object** object_array, int object_counter, double** pixel_buffer, int N, int M){	//This raymarches our object_array
@@ -132,7 +151,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 	double h;
 	double pixwidth;
 	double pixheight;
-	Tuple* intersection;
+	Intersect* intersection;
 	
 	if(object_array[parse_count]->kind != Camera){	//If camera is not present, throw an error
 		fprintf(stderr, "Error: You must have one object of type camera\n");
@@ -161,7 +180,7 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
-				calculate_color(color, intersection);
+				calculate_color(object_array, color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];
