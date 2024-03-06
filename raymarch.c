@@ -131,11 +131,11 @@ void intersect_normal( double* normal, double* intersect_pos, Object* object ){
 void calculate_color(Object** object_array, double* color, Intersect* intersection){
 	double normal[3] = {0.0, 0.0, 0.0};
 	intersect_normal(normal, intersection->position, object_array[intersection->best_index]);
-	vector_mult(normal, 0.5);
-	vector_add(normal, 0.5);
-	color[0] = (int)(normal[0] * COLOR_LIMIT);
-	color[1] = (int)(normal[1] * COLOR_LIMIT);
-	color[2] = (int)(normal[2] * COLOR_LIMIT);
+	vector_mult( normal, .5 );
+	vector_add( normal, .5 );
+	color[0] = normal[0];
+	color[1] = normal[1];
+	color[2] = normal[2];
 }
 
 void raymarch_scene(Object** object_array, int object_counter, double** pixel_buffer, int N, int M){	//This raymarches our object_array
