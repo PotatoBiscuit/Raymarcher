@@ -1,7 +1,7 @@
 [
 {
     "type": "camera",
-    "width": 2.0,
+    "width": 4.0,
     "height": 2.0
 },
 {
@@ -40,6 +40,6 @@
     "radial-a2": 0.125,
     "radial-a1": 0.125,
     "radial-a0": 0.125,
-    "position": [1.5, -2, 3.5]
+    "position": [1.5, -3, 3.5]
 }
 ]
