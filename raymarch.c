@@ -58,8 +58,7 @@ void argument_checker(int c, char** argv){	//Check input arguments for validity
 }
 
 double sphere_intersection(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
-    double distance = distance_between(sphere_position, position);
-    return distance - radius;
+    return distance_between(sphere_position, position) - radius;
 }
 
 Intersect* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){	//Find object intersections
@@ -118,9 +117,20 @@ Intersect* shoot(Object** object_array, int object_counter, double* Ro, double* 
 
 void intersect_normal( double* normal, double* intersect_pos, Object* object ){
 	if( object->kind == Sphere ){
-		normal[0] = intersect_pos[0] - object->sphere.position[0];
-		normal[1] = intersect_pos[1] - object->sphere.position[1];
-		normal[2] = intersect_pos[2] - object->sphere.position[2];
+		double sampling_interval = .0001;
+
+		//Intersect coordinates to make things easier to read
+		double x = intersect_pos[0];
+		double y = intersect_pos[1];
+		double z = intersect_pos[2];
+
+		normal[0] = sphere_intersection((double[3]){x + sampling_interval, y, z}, object->sphere.position, object->sphere.radius) -
+					sphere_intersection((double[3]){x - sampling_interval, y, z}, object->sphere.position, object->sphere.radius);
+		normal[1] = sphere_intersection((double[3]){x, y + sampling_interval, z}, object->sphere.position, object->sphere.radius) -
+					sphere_intersection((double[3]){x, y - sampling_interval, z}, object->sphere.position, object->sphere.radius);
+		normal[2] = sphere_intersection((double[3]){x, y, z + sampling_interval}, object->sphere.position, object->sphere.radius) -
+					sphere_intersection((double[3]){x, y, z - sampling_interval}, object->sphere.position, object->sphere.radius);
+
 		normalize(normal);
 	}
 	else{

@@ -8,7 +8,7 @@ typedef struct{	//Holds object intersection information
 } Intersect;
 
 #define MAX_RECURSION 7
-#define INTERSECTION_LIMIT .0001
+#define INTERSECTION_LIMIT .000001
 #define OUTER_BOUNDS 1000000
 #define COLOR_LIMIT 256.0
 
