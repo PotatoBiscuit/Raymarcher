@@ -8,6 +8,10 @@
 #include "parse_json.h"
 #include "raymarch.h"
 
+//These variables should NOT be changed after parsing the json file
+Object* object_array[130];
+int object_counter;
+
 void argument_checker(int c, char** argv){	//Check input arguments for validity
 	int i = 0;
 	int j = 0;
@@ -58,56 +62,57 @@ void argument_checker(int c, char** argv){	//Check input arguments for validity
 }
 
 double sphere_intersection(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
-    return distance_between(sphere_position, position) - radius;
+	return distance_between(sphere_position, position) - radius;
 }
 
-Intersect* shoot(Object** object_array, int object_counter, double* Ro, double* Rd){	//Find object intersections
+double all_intersections( double* position ){
+    double temp_distance = INFINITY;
+	double temp_min_distance = INFINITY;
+	int parse_count = 1;
+	while(parse_count < object_counter + 1){	//do the raymarching with a ray
+
+		if(object_array[parse_count]->kind == Sphere){
+			temp_distance = sphere_intersection(position, object_array[parse_count]->sphere.position,
+						object_array[parse_count]->sphere.radius);
+			
+			temp_min_distance = min( temp_distance, temp_min_distance );
+
+		}else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
+			//plane intersection
+		}else{	//If a light was found, skip it
+			//do nothing
+		}
+		parse_count++;
+	}
+	return temp_min_distance;
+}
+
+Intersect* shoot(double* Ro, double* Rd){	//Find object intersections
 	Intersect* intersection = malloc(sizeof(Intersect));
 	int parse_count = 1;
 	double closest_distance = INFINITY;
 	int best_index = -1;
+	int num_steps = 0;
 
     double temp_ray_position[3] = {Ro[0], Ro[1], Ro[2]};
 	
-    while(1){
-        double temp_distance = INFINITY;
-        double temp_min_distance = INFINITY;
-        while(parse_count < object_counter + 1){	//do the raymarching with a ray
-
-            if(object_array[parse_count]->kind == Sphere){	//See if a sphere overshadows our point of intersection
-                temp_distance = sphere_intersection(temp_ray_position, object_array[parse_count]->sphere.position,
-                            object_array[parse_count]->sphere.radius);
-                if( temp_distance >= 0 ) {
-                    temp_min_distance = min( temp_distance, temp_min_distance );
-                    best_index = parse_count;
-                }
-
-            }else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
-                //plane intersection
-            }else{	//If a light was found, skip it
-                //do nothing
-            }
-
-            parse_count++;
-	    }
-
+	double temp_min_distance = INFINITY;
+    while(num_steps++ < MAX_STEPS){
+		temp_min_distance = all_intersections( temp_ray_position );
         temp_ray_position[0] += Rd[0]*temp_min_distance;
         temp_ray_position[1] += Rd[1]*temp_min_distance;
         temp_ray_position[2] += Rd[2]*temp_min_distance;
         if( temp_min_distance < INTERSECTION_LIMIT || temp_min_distance > OUTER_BOUNDS ) {
-            if( temp_min_distance > OUTER_BOUNDS ) {
-                closest_distance = -1;
-            }
-            else if( object_array[best_index]->kind == Sphere ){
-                closest_distance = sphere_intersection(Ro, object_array[best_index]->sphere.position,
-                    object_array[best_index]->sphere.radius);
+			if( temp_min_distance > OUTER_BOUNDS ) {
+				closest_distance = -1;
+			}
+            else{
+                closest_distance = distance_between(temp_ray_position, Ro);
             }
             break;
         }
-        parse_count = 1;
     }
 
-	intersection->best_index = best_index;
 	intersection->best_t = closest_distance;
 	intersection->position[0] = temp_ray_position[0];
 	intersection->position[1] = temp_ray_position[1];
@@ -115,30 +120,25 @@ Intersect* shoot(Object** object_array, int object_counter, double* Ro, double* 
 	return intersection;
 }
 
-void intersect_normal( double* normal, double* intersect_pos, Object* object ){
-	if( object->kind == Sphere ){
-		double sampling_interval = .0001;
+void intersect_normal( double* normal, double* intersect_pos ){
+	double sampling_interval = .0001;
 
-		//Intersect coordinates to make things easier to read
-		double x = intersect_pos[0];
-		double y = intersect_pos[1];
-		double z = intersect_pos[2];
+	//Intersect coordinates to make things easier to read
+	double x = intersect_pos[0];
+	double y = intersect_pos[1];
+	double z = intersect_pos[2];
 
-		normal[0] = sphere_intersection((double[3]){x + sampling_interval, y, z}, object->sphere.position, object->sphere.radius) -
-					sphere_intersection((double[3]){x - sampling_interval, y, z}, object->sphere.position, object->sphere.radius);
-		normal[1] = sphere_intersection((double[3]){x, y + sampling_interval, z}, object->sphere.position, object->sphere.radius) -
-					sphere_intersection((double[3]){x, y - sampling_interval, z}, object->sphere.position, object->sphere.radius);
-		normal[2] = sphere_intersection((double[3]){x, y, z + sampling_interval}, object->sphere.position, object->sphere.radius) -
-					sphere_intersection((double[3]){x, y, z - sampling_interval}, object->sphere.position, object->sphere.radius);
+	normal[0] = all_intersections((double[3]){x + sampling_interval, y, z}) -
+				all_intersections((double[3]){x - sampling_interval, y, z});
+	normal[1] = all_intersections((double[3]){x, y + sampling_interval, z}) -
+				all_intersections((double[3]){x, y - sampling_interval, z});
+	normal[2] = all_intersections((double[3]){x, y, z + sampling_interval}) -
+				all_intersections((double[3]){x, y, z - sampling_interval});
 
-		normalize(normal);
-	}
-	else{
-		//handle more primitives in the future
-	}
+	normalize(normal);
 }
 
-double* find_light_pos( Object** object_array, int object_counter ){ // Just find 1 light for now
+double* find_light_pos(){ // Just find 1 light for now
 	int parse_count = 1;
 	while(parse_count++ < object_counter + 1){
 		if(object_array[parse_count]->kind == Light) {
@@ -147,11 +147,11 @@ double* find_light_pos( Object** object_array, int object_counter ){ // Just fin
 	}
 }
 
-void calculate_color( Object** object_array, int object_counter, double* color, Intersect* intersection ){
+void calculate_color( double* color, Intersect* intersection ){
 	double normal[3] = {0.0, 0.0, 0.0};
-	intersect_normal(normal, intersection->position, object_array[intersection->best_index]);
+	intersect_normal(normal, intersection->position);
 
-	double* light_pos = find_light_pos( object_array, object_counter );
+	double* light_pos = find_light_pos();
 
 	double light_direction[3];
 	light_direction[0] = intersection->position[0] - light_pos[0];
@@ -162,9 +162,11 @@ void calculate_color( Object** object_array, int object_counter, double* color, 
 	double diffuse_intensity = clamp( dot_product( normal, light_direction ) );
 
 	color[0] = diffuse_intensity;
+	color[1] = 0;
+	color[2] = 0;
 }
 
-void raymarch_scene(Object** object_array, int object_counter, double** pixel_buffer, int N, int M){	//This raymarches our object_array
+void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our object_array
 	int parse_count = 0;
 	int pixel_count = 0;
 	int i;
@@ -202,11 +204,11 @@ void raymarch_scene(Object** object_array, int object_counter, double** pixel_bu
 			Rd[1] = cy - (h/2) + pixheight * (y + .5);
 			Rd[2] = 1;
 			normalize(Rd);
-			intersection = shoot(object_array, object_counter, Ro, Rd);
+			intersection = shoot(Ro, Rd);
 
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
-				calculate_color(object_array, object_counter, color, intersection);
+				calculate_color(color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];
@@ -239,11 +241,11 @@ void create_image(double** pixel_buffer, char* output, int width, int height){	/
 	fclose(output_pointer);
 }
 
-void move_camera_to_front(Object** object_array, int object_count){	//Moves camera object to the front of object_array
+void move_camera_to_front(){	//Moves camera object to the front of object_array
 	Object* temp_object;
 	int counter = 0;
 	int num_cameras = 0;
-	while(counter < object_count + 1){	//Iterate through all objects in object_array
+	while(counter < object_counter + 1){	//Iterate through all objects in object_array
 		if(object_array[counter]->kind == Camera && counter == 0){	//If first object is a camera, do nothing
 			num_cameras++;
 		}else if(object_array[counter]->kind == Camera){		//If a camera is found further in the array, switch first object with it
@@ -260,13 +262,10 @@ void move_camera_to_front(Object** object_array, int object_count){	//Moves came
 }
 
 void main(int c, char** argv){
-    Object** object_array = malloc(sizeof(Object*)*130);	//Create array of object pointers
 	int width;
 	int height;
 	double** pixel_buffer;
-	int object_counter;
 	int counter = 0;
-	object_array[129] = NULL;	//Indicate end of object pointer array with a NULL
 	
 	argument_checker(c, argv);	//Check our arguments to make sure they written correctly
 	
@@ -284,8 +283,8 @@ void main(int c, char** argv){
 		counter++;
 	}
 	object_counter = read_scene(argv[3], object_array);	//Parse .json scene file
-	move_camera_to_front(object_array, object_counter);	//Make camera the first object in our object array
-	raymarch_scene(object_array, object_counter, pixel_buffer, width, height);	//Raycast our scene into the pixel array
+	move_camera_to_front();	//Make camera the first object in our object array
+	raymarch_scene(pixel_buffer, width, height);	//Raycast our scene into the pixel array
 	create_image(pixel_buffer, argv[4], width, height);	//Put info from pixel array into a P6 PPM file
     return;
 }
