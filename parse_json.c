@@ -108,18 +108,15 @@ double* next_vector(FILE* json) {	//parse the next vector, and return it in doub
 
 //This function takes an input value or vector, and puts it into our object array
 void store_value(Object* input_object, int type_of_field, double input_value, double* input_vector){
-	//type_of_field values: 0 = width, 1 = height, 2 = radius, 3 = diffuse_color, 4 = specular_color, 5 = position, 6 = normal
-	//7 = radial_a0, 8 = radial_a1, 9 = radial_a2, 10 = angular_a0, 11 = color, 12 = direction, 13 = theta
-	//14 = reflectivity, 15 = refractivity, 16 = ior
 	//if input_value or input_vector aren't used, a 0 or NULL value should be passed in
 	if(input_object->kind == Camera){	//If the object is a camera, store the input into its width or height fields
-		if(type_of_field == 0){
+		if(type_of_field == Width){
 			if(input_value <= 0){
 				fprintf(stderr, "Error: Camera width must be greater than 0, line:%d\n", line);
 				exit(1);
 			}
 			input_object->camera.width = input_value;
-		}else if(type_of_field == 1){
+		}else if(type_of_field == Height){
 			if(input_value <= 0){
 				fprintf(stderr, "Error: Camera height must be greater than 0, line:%d\n", line);
 				exit(1);
@@ -130,9 +127,9 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			exit(1);
 		}
 	}else if(input_object->kind == Sphere){	//If the object is a sphere, store input into its respective fields
-		if(type_of_field == 2){
+		if(type_of_field == Radius){
 			input_object->sphere.radius = input_value;
-		}else if(type_of_field == 3){
+		}else if(type_of_field == Diffuse_Color){
 			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
 				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
 				exit(1);
@@ -144,7 +141,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			input_object->sphere.diffuse_color[0] = input_vector[0];
 			input_object->sphere.diffuse_color[1] = input_vector[1];
 			input_object->sphere.diffuse_color[2] = input_vector[2];
-		}else if(type_of_field == 4){
+		}else if(type_of_field == Specular_Color){
 			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
 				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
 				exit(1);
@@ -156,23 +153,23 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			input_object->sphere.specular_color[0] = input_vector[0];
 			input_object->sphere.specular_color[1] = input_vector[1];
 			input_object->sphere.specular_color[2] = input_vector[2];
-		}else if(type_of_field == 5){
+		}else if(type_of_field == Position){
 			input_object->sphere.position[0] = input_vector[0];
 			input_object->sphere.position[1] = input_vector[1];
 			input_object->sphere.position[2] = input_vector[2];
-		}else if(type_of_field == 14){
+		}else if(type_of_field == Reflectivity){
 			if(input_value + input_object->sphere.refractivity > 1 || input_value < 0){
 				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
 				exit(1);
 			}
 			input_object->sphere.reflectivity = input_value;
-		}else if(type_of_field == 15){
+		}else if(type_of_field == Refractivity){
 			if(input_value + input_object->sphere.reflectivity > 1 || input_value < 0){
 				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
 				exit(1);
 			}
 			input_object->sphere.refractivity = input_value;
-		}else if(type_of_field == 16){
+		}else if(type_of_field == Ior){
 			if(input_value < 1) input_value = 1;
 			input_object->sphere.ior = input_value;
 		}else{
@@ -180,7 +177,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			exit(1);
 		}
 	}else if(input_object->kind == Plane){	//If the object is a plane, store input into its respective fields
-		if(type_of_field == 3){
+		if(type_of_field == Diffuse_Color){
 			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
 				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
 				exit(1);
@@ -192,7 +189,7 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			input_object->plane.diffuse_color[0] = input_vector[0];
 			input_object->plane.diffuse_color[1] = input_vector[1];
 			input_object->plane.diffuse_color[2] = input_vector[2];
-		}else if(type_of_field == 4){
+		}else if(type_of_field == Specular_Color){
 			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
 				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
 				exit(1);
@@ -204,11 +201,11 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			input_object->plane.specular_color[0] = input_vector[0];
 			input_object->plane.specular_color[1] = input_vector[1];
 			input_object->plane.specular_color[2] = input_vector[2];
-		}else if(type_of_field == 5){
+		}else if(type_of_field == Position){
 			input_object->plane.position[0] = input_vector[0];
 			input_object->plane.position[1] = input_vector[1];
 			input_object->plane.position[2] = input_vector[2];
-		}else if(type_of_field == 6){
+		}else if(type_of_field == Normal){
 			if(input_vector[2] > 0){
 				input_object->plane.normal[0] = -input_vector[0];
 				input_object->plane.normal[1] = -input_vector[1];
@@ -219,19 +216,19 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 				input_object->plane.normal[2] = input_vector[2];
 			}
 			normalize(input_object->plane.normal);
-		}else if(type_of_field == 14){
+		}else if(type_of_field == Reflectivity){
 			if(input_value + input_object->plane.refractivity > 1 || input_value < 0){
 				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
 				exit(1);
 			}
 			input_object->plane.reflectivity = input_value;
-		}else if(type_of_field == 15){
+		}else if(type_of_field == Refractivity){
 			if(input_value + input_object->plane.reflectivity > 1 || input_value < 0){
 				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
 				exit(1);
 			}
 			input_object->plane.refractivity = input_value;
-		}else if(type_of_field == 16){
+		}else if(type_of_field == Ior){
 			if(input_value < 1) input_value = 1;
 			input_object->plane.ior = input_value;
 		}else{
@@ -239,28 +236,28 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			exit(1);
 		}
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
-		if(type_of_field == 5){
+		if(type_of_field == Position){
 			input_object->light.position[0] = input_vector[0];
 			input_object->light.position[1] = input_vector[1];
 			input_object->light.position[2] = input_vector[2];
-		}else if(type_of_field == 11){
+		}else if(type_of_field == Color){
 			input_object->light.color[0] = input_vector[0];
 			input_object->light.color[1] = input_vector[1];
 			input_object->light.color[2] = input_vector[2];
-		}else if(type_of_field == 12){
+		}else if(type_of_field == Direction){
 			input_object->light.direction[0] = input_vector[0];
 			input_object->light.direction[1] = input_vector[1];
 			input_object->light.direction[2] = input_vector[2];
 			normalize(input_object->light.direction);
-		}else if(type_of_field == 7){
+		}else if(type_of_field == Radial_A0){
 			input_object->light.radial_a0 = input_value;
-		}else if(type_of_field == 8){
+		}else if(type_of_field == Radial_A1){
 			input_object->light.radial_a1 = input_value;
-		}else if(type_of_field == 9){
+		}else if(type_of_field == Radial_A2){
 			input_object->light.radial_a2 = input_value;
-		}else if(type_of_field == 10){
+		}else if(type_of_field == Angular_A0){
 			input_object->light.angular_a0 = input_value;
-		}else if(type_of_field == 13){
+		}else if(type_of_field == Theta){
 			input_object->light.theta = input_value;
 		}else{
 			fprintf(stderr, "Error: Lights may only have the fields listed, line:%d\n", line);

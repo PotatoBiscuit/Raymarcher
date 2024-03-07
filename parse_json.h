@@ -1,7 +1,13 @@
 #ifndef PARSE_JSON
 #define PARSE_JSON
 
-typedef enum { Camera, Sphere, Plane, Light, Box } Primitive;
+typedef enum {
+	Camera,
+	Sphere,
+	Plane,
+	Light,
+	Box
+} Primitive;
 
 typedef struct {	//Create structure to be used for our object_array
   Primitive kind; // 0 = camera, 1 = sphere, 2 = plane, 3 = light
@@ -42,5 +48,25 @@ typedef struct {	//Create structure to be used for our object_array
 } Object;
 
 int read_scene(char* filename, Object** object_array);
+
+typedef enum {
+	Width,
+	Height,
+	Radius,
+	Diffuse_Color,
+	Specular_Color,
+	Position,
+	Normal,
+	Radial_A0,
+	Radial_A1,
+	Radial_A2,
+	Angular_A0,
+	Color,
+	Direction,
+	Theta,
+	Reflectivity,
+	Refractivity,
+	Ior
+} FieldType;
 
 #endif
