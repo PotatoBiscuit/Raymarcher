@@ -372,27 +372,27 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                 exit(1);
             }
             if(radial_a0 == 1){	//If radial_a0 did not exist in json file, store the default value 1
-                store_value(object_array[object_counter], 7, 1, NULL);
+                store_value(object_array[object_counter], Radial_A0, 1, NULL);
                 radial_a0 = 0;
             }
             if(radial_a1 == 1){	//If radial_a1 did not exist in json file, store the default value 0
-                store_value(object_array[object_counter], 8, 0, NULL);
+                store_value(object_array[object_counter], Radial_A1, 0, NULL);
                 radial_a1 = 0;
             }
             if(radial_a2 == 1){	//If radial_a2 did not exist in json file, store the default value 0
-                store_value(object_array[object_counter], 9, 0, NULL);
+                store_value(object_array[object_counter], Radial_A2, 0, NULL);
                 radial_a2 = 0;
             }
             if(angular_a0 == 1){	//If angular_a0 did not exist in json file, store default value 0
-                store_value(object_array[object_counter], 10, 0, NULL);
+                store_value(object_array[object_counter], Angular_A0, 0, NULL);
                 angular_a0 = 0;
             }
             if(theta == 1){	//If theta did not exist in json file, store default value 0
-                store_value(object_array[object_counter], 13, 0, NULL);
+                store_value(object_array[object_counter], Theta, 0, NULL);
                 theta = 0;
             }
             if(ior == 1){
-                store_value(object_array[object_counter], 16, 1, NULL);
+                store_value(object_array[object_counter], Ior, 1, NULL);
                 ior = 0;
             }
             break;
@@ -405,68 +405,68 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                 skip_ws(json);
                 if (strcmp(key, "width") == 0){	//Based on the field, parse a number or vector
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 0, value, NULL);	//And store the value in the object_array
+                    store_value(object_array[object_counter], Width, value, NULL);	//And store the value in the object_array
                     width = 0;
                 }else if(strcmp(key, "height") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 1, value, NULL);
+                    store_value(object_array[object_counter], Height, value, NULL);
                     height = 0;
                 }else if(strcmp(key, "radius") == 0) {
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 2, value, NULL);
+                    store_value(object_array[object_counter], Radius, value, NULL);
                     radius = 0;
                 }else if (strcmp(key, "color") == 0){
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 11, 0, value);
+                    store_value(object_array[object_counter], Color, 0, value);
                     color = 0;
                 }else if(strcmp(key, "position") == 0){
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 5, 0, value);
+                    store_value(object_array[object_counter], Position, 0, value);
                     position = 0;
                 }else if(strcmp(key, "normal") == 0) {
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 6, 0, value);
+                    store_value(object_array[object_counter], Normal, 0, value);
                     normal = 0;
                 }else if(strcmp(key, "diffuse_color") == 0){
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 3, 0, value);
+                    store_value(object_array[object_counter], Diffuse_Color, 0, value);
                     diffuse_color = 0;
                 }else if(strcmp(key, "specular_color") == 0){
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 4, 0, value);
+                    store_value(object_array[object_counter], Specular_Color, 0, value);
                     specular_color = 0;
                 }else if(strcmp(key, "radial-a0") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 7, value, NULL);
+                    store_value(object_array[object_counter], Radial_A0, value, NULL);
                     radial_a0 = 0;
                 }else if(strcmp(key, "radial-a1") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 8, value, NULL);
+                    store_value(object_array[object_counter], Radial_A1, value, NULL);
                     radial_a1 = 0;
                 }else if(strcmp(key, "radial-a2") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 9, value, NULL);
+                    store_value(object_array[object_counter], Radial_A2, value, NULL);
                     radial_a2 = 0;
                 }else if(strcmp(key, "angular-a0") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 10, value, NULL);
+                    store_value(object_array[object_counter], Angular_A0, value, NULL);
                     angular_a0 = 0;
                 }else if(strcmp(key, "direction") == 0){
                     double* value = next_vector(json);
-                    store_value(object_array[object_counter], 12, 0, value);
+                    store_value(object_array[object_counter], Direction, 0, value);
                 }else if(strcmp(key, "theta") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 13, degrees_to_radians(value), NULL);
+                    store_value(object_array[object_counter], Theta, degrees_to_radians(value), NULL);
                     theta = 0;
                 }else if(strcmp(key, "reflectivity") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 14, value, NULL);
+                    store_value(object_array[object_counter], Reflectivity, value, NULL);
                 }else if(strcmp(key, "refractivity") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 15, value, NULL);
+                    store_value(object_array[object_counter], Refractivity, value, NULL);
                 }else if(strcmp(key, "ior") == 0){
                     double value = next_number(json);
-                    store_value(object_array[object_counter], 16, value, NULL);
+                    store_value(object_array[object_counter], Ior, value, NULL);
                     ior = 0;
                 }else{	//If there was an invalid field, throw an error
                         fprintf(stderr, "Error: Unknown property, \"%s\", on line %d.\n",
