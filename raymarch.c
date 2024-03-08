@@ -61,8 +61,13 @@ void argument_checker(int c, char** argv){	//Check input arguments for validity
 	}
 }
 
-double sphere_intersection(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
+double sphere_sdf(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
 	return distance_between(sphere_position, position) - radius;
+}
+
+double plane_sdf( double* position, double* plane_point, double* plane_normal ){
+	double difference[3] = { position[0] - plane_point[0], position[1] - plane_point[1], position[2] - plane_point[2] };
+	return dot_product( difference, plane_normal );
 }
 
 double all_intersections( double* position ){
@@ -72,13 +77,16 @@ double all_intersections( double* position ){
 	while(parse_count < object_counter + 1){	//do the raymarching with a ray
 
 		if(object_array[parse_count]->kind == Sphere){
-			temp_distance = sphere_intersection(position, object_array[parse_count]->sphere.position,
-						object_array[parse_count]->sphere.radius);
+			temp_distance = sphere_sdf( position, object_array[parse_count]->sphere.position,
+						object_array[parse_count]->sphere.radius );
 			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
-			//plane intersection
+			temp_distance = plane_sdf( position, object_array[parse_count]->plane.position,
+						object_array[parse_count]->plane.normal );
+						
+			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it
 			//do nothing
 		}
