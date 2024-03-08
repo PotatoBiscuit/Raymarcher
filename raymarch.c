@@ -143,10 +143,6 @@ void intersect_normal( double* normal, double* intersect_pos ){
 	normal[2] = all_intersections((double[3]){x, y, z + sampling_interval}) -
 				all_intersections((double[3]){x, y, z - sampling_interval});
 
-	//Because of the way my coordinates are set up, the normal ended up going in the opposite direction
-	//For now just flip it across the origin, if bugs are found this may need to be revisited
-	vector_mult(normal, -1.0);
-
 	normalize(normal);
 }
 
@@ -179,7 +175,9 @@ void calculate_color( double* color, Intersect* intersection ){
 	light_direction[2] = intersection->position[2] - light->light.position[2];
 	normalize( light_direction );
 
-	double diffuse_intensity = clamp( dot_product( normal, light_direction ) );
+	double intersect_to_light[3] = {-light_direction[0], -light_direction[1], -light_direction[2]};
+
+	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
 
 	double shadow_mult = calculate_shadow( light->light.position, light_direction, intersection->position );
 
