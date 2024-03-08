@@ -158,8 +158,10 @@ Object* find_light(){ // Just find 1 light for now
 double calculate_shadow( double* light_pos, double* light_direction, double* intersect_pos ){
 	Intersect* light_collision = raymarch(light_pos, light_direction);
 	if( distance_between( light_collision->position, intersect_pos ) <= 1 ){
+		free(light_collision);
 		return 1.0;
 	}
+	free(light_collision);
 	return 0.0;
 }
 
@@ -308,5 +310,7 @@ void main(int c, char** argv){
 	move_camera_to_front();	//Make camera the first object in our object array
 	raymarch_scene(pixel_buffer, width, height);	//Raycast our scene into the pixel array
 	create_image(pixel_buffer, argv[4], width, height);	//Put info from pixel array into a P6 PPM file
+
+	// I would free pixel_buffer here, but we're not creating any more of it, and the main function is ending anyways
     return;
 }
