@@ -85,7 +85,7 @@ double all_intersections( double* position ){
 		}else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
 			temp_distance = plane_sdf( position, object_array[parse_count]->plane.position,
 						object_array[parse_count]->plane.normal );
-						
+
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it
 			//do nothing
@@ -95,7 +95,7 @@ double all_intersections( double* position ){
 	return temp_min_distance;
 }
 
-Intersect* shoot(double* Ro, double* Rd){	//Find object intersections
+Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
 	Intersect* intersection = malloc(sizeof(Intersect));
 	int parse_count = 1;
 	double closest_distance = INFINITY;
@@ -143,35 +143,51 @@ void intersect_normal( double* normal, double* intersect_pos ){
 	normal[2] = all_intersections((double[3]){x, y, z + sampling_interval}) -
 				all_intersections((double[3]){x, y, z - sampling_interval});
 
+	//Because of the way my coordinates are set up, the normal ended up going in the opposite direction
+	//For now just flip it across the origin, if bugs are found this may need to be revisited
+	vector_mult(normal, -1.0);
+
 	normalize(normal);
 }
 
-double* find_light_pos(){ // Just find 1 light for now
+Object* find_light(){ // Just find 1 light for now
 	int parse_count = 1;
 	while(parse_count++ < object_counter + 1){
 		if(object_array[parse_count]->kind == Light) {
-			return object_array[parse_count]->light.position;
+			return object_array[parse_count];
 		}
 	}
+}
+
+double calculate_shadow( double* light_pos, double* light_direction, double* intersect_pos ){
+	Intersect* light_collision = raymarch(light_pos, light_direction);
+	if( distance_between( light_collision->position, intersect_pos ) <= 1 ){
+		return 1.0;
+	}
+	return 0.0;
 }
 
 void calculate_color( double* color, Intersect* intersection ){
 	double normal[3] = {0.0, 0.0, 0.0};
 	intersect_normal(normal, intersection->position);
 
-	double* light_pos = find_light_pos();
+	Object* light = find_light();
 
 	double light_direction[3];
-	light_direction[0] = intersection->position[0] - light_pos[0];
-	light_direction[1] = intersection->position[1] - light_pos[1];
-	light_direction[2] = intersection->position[2] - light_pos[2];
+	light_direction[0] = intersection->position[0] - light->light.position[0];
+	light_direction[1] = intersection->position[1] - light->light.position[1];
+	light_direction[2] = intersection->position[2] - light->light.position[2];
 	normalize( light_direction );
 
 	double diffuse_intensity = clamp( dot_product( normal, light_direction ) );
 
+	double shadow_mult = calculate_shadow( light->light.position, light_direction, intersection->position );
+
 	color[0] = diffuse_intensity;
 	color[1] = 0;
 	color[2] = 0;
+
+	vector_mult( color, shadow_mult );
 }
 
 void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our object_array
@@ -212,7 +228,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 			Rd[1] = cy - (h/2) + pixheight * (y + .5);
 			Rd[2] = 1;
 			normalize(Rd);
-			intersection = shoot(Ro, Rd);
+			intersection = raymarch(Ro, Rd);
 
 			
 			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
