@@ -235,6 +235,54 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			fprintf(stderr, "Error: Planes only have 'radius', 'specular_color', 'diffuse_color', or 'normal' fields, line:%d\n", line);
 			exit(1);
 		}
+    }else if (input_object->kind == Mandelbulb){
+        if(type_of_field == Diffuse_Color){
+			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
+				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
+				exit(1);
+			}
+			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
+				fprintf(stderr, "Error: Diffuse color values may not be negative, line:%d\n", line);
+				exit(1);
+			}
+			input_object->mandelbulb.diffuse_color[0] = input_vector[0];
+			input_object->mandelbulb.diffuse_color[1] = input_vector[1];
+			input_object->mandelbulb.diffuse_color[2] = input_vector[2];
+		}else if(type_of_field == Specular_Color){
+			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
+				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
+				exit(1);
+			}
+			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
+				fprintf(stderr, "Error: Specular color values may not be negative, line:%d\n", line);
+				exit(1);
+			}
+			input_object->mandelbulb.specular_color[0] = input_vector[0];
+			input_object->mandelbulb.specular_color[1] = input_vector[1];
+			input_object->mandelbulb.specular_color[2] = input_vector[2];
+		}else if(type_of_field == Position){
+			input_object->mandelbulb.position[0] = input_vector[0];
+			input_object->mandelbulb.position[1] = input_vector[1];
+			input_object->mandelbulb.position[2] = input_vector[2];
+		}else if(type_of_field == Reflectivity){
+			if(input_value + input_object->mandelbulb.refractivity > 1 || input_value < 0){
+				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
+				exit(1);
+			}
+			input_object->mandelbulb.reflectivity = input_value;
+		}else if(type_of_field == Refractivity){
+			if(input_value + input_object->mandelbulb.reflectivity > 1 || input_value < 0){
+				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
+				exit(1);
+			}
+			input_object->mandelbulb.refractivity = input_value;
+		}else if(type_of_field == Ior){
+			if(input_value < 1) input_value = 1;
+			input_object->mandelbulb.ior = input_value;
+		}else{
+			fprintf(stderr, "Error: Mandelbulbs only have 'specular_color', 'diffuse_color', or 'position' fields, line:%d\n", line);
+			exit(1);
+		}
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
 		if(type_of_field == Position){
 			input_object->light.position[0] = input_vector[0];
@@ -341,6 +389,12 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
             object_array[object_counter]->kind = Plane;
             position = 1;
             normal = 1;
+            specular_color = 1;
+            diffuse_color = 1;
+            ior = 1;
+        } else if (strcmp(value, "mandelbulb") == 0) {
+            object_array[object_counter]->kind = Mandelbulb;
+            position = 1;
             specular_color = 1;
             diffuse_color = 1;
             ior = 1;
