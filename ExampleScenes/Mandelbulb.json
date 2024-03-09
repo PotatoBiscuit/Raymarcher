@@ -11,7 +11,7 @@
         "ior": 1,
         "reflectivity": 0.5,
         "refractivity": 0.5,
-        "position": [0, 0, 3]
+        "position": [0, 0, 1.5]
     },
     {
         "type": "light",
@@ -20,6 +20,6 @@
         "radial-a2": 0.125,
         "radial-a1": 0.125,
         "radial-a0": 0.125,
-        "position": [0, 0, -5]
+        "position": [1, 1, 0]
     }
 ]

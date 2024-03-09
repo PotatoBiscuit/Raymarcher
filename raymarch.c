@@ -70,6 +70,29 @@ double plane_sdf( double* position, double* plane_point, double* plane_normal ){
 	return dot_product( difference, plane_normal );
 }
 
+double mandelbulb_sdf( double* position, double* mandelbulb_position ){
+	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
+	double x = adjusted_pos[0];double y = adjusted_pos[1];double z = adjusted_pos[2];
+	double dr = 1.0;
+	double r;
+	double power = 8.0;
+	for( int i = 0; i < 100; i++ ) {
+		r = magnitude( (double[3]){x, y, z} );
+		if( r > 2.0 ){ break; }
+
+		double theta = acos( z / r ) * power;
+		double phi = atan2(y, x) * power;
+		dr = pow( r, power - 1.0 ) * power * dr + 1.0;
+
+		double zr = pow( r, power );
+
+		x = x + adjusted_pos[0] + zr * sin(theta) * cos(phi);
+		y = y + adjusted_pos[1] + zr * sin(theta) * sin(phi);
+		z = z + adjusted_pos[2] + zr * cos(theta);
+	}
+	return 0.5 * log(r)*r/dr;
+}
+
 double all_intersections( double* position ){
     double temp_distance = INFINITY;
 	double temp_min_distance = INFINITY;
@@ -86,6 +109,10 @@ double all_intersections( double* position ){
 			temp_distance = plane_sdf( position, object_array[parse_count]->plane.position,
 						object_array[parse_count]->plane.normal );
 
+			temp_min_distance = min( temp_distance, temp_min_distance );
+		}else if( object_array[parse_count]->kind == Mandelbulb ){
+			temp_distance = mandelbulb_sdf( position, object_array[parse_count]->mandelbulb.position );
+			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it
 			//do nothing
@@ -162,7 +189,7 @@ double calculate_shadow( double* light_pos, double* light_direction, double* int
 		return 1.0;
 	}
 	free(light_collision);
-	return 0.0;
+	return 0.25; //Reduce color to 25% brightness
 }
 
 void calculate_color( double* color, Intersect* intersection ){
