@@ -24,7 +24,7 @@ make debug
 ![](ExampleScenes/BasicSphereAndWalls.png)
 
 ```
-./raymarcher 1000 500 ExampleScenes/Mandelbulb.json Mandelbulb.ppm
+./raymarcher 1400 700 ExampleScenes/Mandelbulb.json Mandelbulb.ppm
 ```
 ![](ExampleScenes/Mandelbulb.png)
 *Images manually converted from .ppm -> .png so Github can display it
