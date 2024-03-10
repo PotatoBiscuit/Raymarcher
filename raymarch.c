@@ -72,23 +72,23 @@ double plane_sdf( double* position, double* plane_point, double* plane_normal ){
 
 double mandelbulb_sdf( double* position, double* mandelbulb_position ){
 	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
-	double x = adjusted_pos[0];double y = adjusted_pos[1];double z = adjusted_pos[2];
+	double temp_pos[3] = {adjusted_pos[0], adjusted_pos[1], adjusted_pos[2]};
 	double dr = 1.0;
 	double r;
 	double power = 8.0;
-	for( int i = 0; i < 100; i++ ) {
-		r = magnitude( (double[3]){x, y, z} );
+	for( int i = 0; i < 20; i++ ) {
+		r = sqrt( dot_product(temp_pos, temp_pos) );
 		if( r > 2.0 ){ break; }
 
-		double theta = acos( z / r ) * power;
-		double phi = atan2(y, x) * power;
+		double theta = acos( temp_pos[2] / r ) * power;
+		double phi = atan2(temp_pos[1], temp_pos[0]) * power;
 		dr = pow( r, power - 1.0 ) * power * dr + 1.0;
 
 		double zr = pow( r, power );
 
-		x = x + adjusted_pos[0] + zr * sin(theta) * cos(phi);
-		y = y + adjusted_pos[1] + zr * sin(theta) * sin(phi);
-		z = z + adjusted_pos[2] + zr * cos(theta);
+		temp_pos[0] = adjusted_pos[0] + zr * sin(theta) * cos(phi);
+		temp_pos[1] = adjusted_pos[1] + zr * sin(theta) * sin(phi);
+		temp_pos[2] = adjusted_pos[2] + zr * cos(theta);
 	}
 	return 0.5 * log(r)*r/dr;
 }
@@ -138,12 +138,12 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
         temp_ray_position[1] += Rd[1]*temp_min_distance;
         temp_ray_position[2] += Rd[2]*temp_min_distance;
         if( temp_min_distance < INTERSECTION_LIMIT || temp_min_distance > OUTER_BOUNDS ) {
-			if( temp_min_distance > OUTER_BOUNDS ) {
-				closest_distance = -1;
-			}
-            else{
+			if( temp_min_distance < OUTER_BOUNDS ) {
                 closest_distance = distance_between(temp_ray_position, Ro);
             }
+			else {
+				closest_distance = INFINITY;
+			}
             break;
         }
     }
@@ -258,7 +258,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 			intersection = raymarch(Ro, Rd);
 
 			
-			if(intersection->best_t > 0 && intersection->best_t != INFINITY){	//If our closest intersection is valid...
+			if(intersection->best_t != INFINITY){	//If our closest intersection is valid...
 				calculate_color(color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];

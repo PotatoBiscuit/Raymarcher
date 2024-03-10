@@ -11,7 +11,7 @@
         "ior": 1,
         "reflectivity": 0.5,
         "refractivity": 0.5,
-        "position": [0, 0, 1.5]
+        "position": [0, 0, 2]
     },
     {
         "type": "light",
