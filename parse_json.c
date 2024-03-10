@@ -106,6 +106,53 @@ double* next_vector(FILE* json) {	//parse the next vector, and return it in doub
     return v;
 }
 
+void store_common_fields(Object* input_object, int type_of_field, double input_value, double* input_vector){
+    if(type_of_field == Diffuse_Color){
+        if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
+            fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
+            exit(1);
+        }
+        if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
+            fprintf(stderr, "Error: Diffuse color values may not be negative, line:%d\n", line);
+            exit(1);
+        }
+        input_object->diffuse_color[0] = input_vector[0];
+        input_object->diffuse_color[1] = input_vector[1];
+        input_object->diffuse_color[2] = input_vector[2];
+    }else if(type_of_field == Specular_Color){
+        if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
+            fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
+            exit(1);
+        }
+        if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
+            fprintf(stderr, "Error: Specular color values may not be negative, line:%d\n", line);
+            exit(1);
+        }
+        input_object->specular_color[0] = input_vector[0];
+        input_object->specular_color[1] = input_vector[1];
+        input_object->specular_color[2] = input_vector[2];
+    }else if(type_of_field == Position){
+        input_object->position[0] = input_vector[0];
+        input_object->position[1] = input_vector[1];
+        input_object->position[2] = input_vector[2];
+    }else if(type_of_field == Reflectivity){
+        if(input_value + input_object->refractivity > 1 || input_value < 0){
+            fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
+            exit(1);
+        }
+        input_object->reflectivity = input_value;
+    }else if(type_of_field == Refractivity){
+        if(input_value + input_object->reflectivity > 1 || input_value < 0){
+            fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
+            exit(1);
+        }
+        input_object->refractivity = input_value;
+    }else if(type_of_field == Ior){
+        if(input_value < 1) input_value = 1;
+        input_object->ior = input_value;
+    }
+}
+
 //This function takes an input value or vector, and puts it into our object array
 void store_value(Object* input_object, int type_of_field, double input_value, double* input_vector){
 	//if input_value or input_vector aren't used, a 0 or NULL value should be passed in
@@ -127,85 +174,13 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			exit(1);
 		}
 	}else if(input_object->kind == Sphere){	//If the object is a sphere, store input into its respective fields
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
 		if(type_of_field == Radius){
 			input_object->sphere.radius = input_value;
-		}else if(type_of_field == Diffuse_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Diffuse color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->sphere.diffuse_color[0] = input_vector[0];
-			input_object->sphere.diffuse_color[1] = input_vector[1];
-			input_object->sphere.diffuse_color[2] = input_vector[2];
-		}else if(type_of_field == Specular_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Specular color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->sphere.specular_color[0] = input_vector[0];
-			input_object->sphere.specular_color[1] = input_vector[1];
-			input_object->sphere.specular_color[2] = input_vector[2];
-		}else if(type_of_field == Position){
-			input_object->sphere.position[0] = input_vector[0];
-			input_object->sphere.position[1] = input_vector[1];
-			input_object->sphere.position[2] = input_vector[2];
-		}else if(type_of_field == Reflectivity){
-			if(input_value + input_object->sphere.refractivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->sphere.reflectivity = input_value;
-		}else if(type_of_field == Refractivity){
-			if(input_value + input_object->sphere.reflectivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->sphere.refractivity = input_value;
-		}else if(type_of_field == Ior){
-			if(input_value < 1) input_value = 1;
-			input_object->sphere.ior = input_value;
-		}else{
-			fprintf(stderr, "Error: Spheres only have 'radius', 'specular_color', 'diffuse_color', or 'position' fields, line:%d\n", line);
-			exit(1);
 		}
 	}else if(input_object->kind == Plane){	//If the object is a plane, store input into its respective fields
-		if(type_of_field == Diffuse_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Diffuse color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->plane.diffuse_color[0] = input_vector[0];
-			input_object->plane.diffuse_color[1] = input_vector[1];
-			input_object->plane.diffuse_color[2] = input_vector[2];
-		}else if(type_of_field == Specular_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Specular color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->plane.specular_color[0] = input_vector[0];
-			input_object->plane.specular_color[1] = input_vector[1];
-			input_object->plane.specular_color[2] = input_vector[2];
-		}else if(type_of_field == Position){
-			input_object->plane.position[0] = input_vector[0];
-			input_object->plane.position[1] = input_vector[1];
-			input_object->plane.position[2] = input_vector[2];
-		}else if(type_of_field == Normal){
+		store_common_fields(input_object, type_of_field, input_value, input_vector);
+		if(type_of_field == Normal){
 			if(input_vector[2] > 0){
 				input_object->plane.normal[0] = -input_vector[0];
 				input_object->plane.normal[1] = -input_vector[1];
@@ -216,78 +191,14 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 				input_object->plane.normal[2] = input_vector[2];
 			}
 			normalize(input_object->plane.normal);
-		}else if(type_of_field == Reflectivity){
-			if(input_value + input_object->plane.refractivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->plane.reflectivity = input_value;
-		}else if(type_of_field == Refractivity){
-			if(input_value + input_object->plane.reflectivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->plane.refractivity = input_value;
-		}else if(type_of_field == Ior){
-			if(input_value < 1) input_value = 1;
-			input_object->plane.ior = input_value;
-		}else{
-			fprintf(stderr, "Error: Planes only have 'radius', 'specular_color', 'diffuse_color', or 'normal' fields, line:%d\n", line);
-			exit(1);
 		}
     }else if (input_object->kind == Mandelbulb){
-        if(type_of_field == Diffuse_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Diffuse color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->mandelbulb.diffuse_color[0] = input_vector[0];
-			input_object->mandelbulb.diffuse_color[1] = input_vector[1];
-			input_object->mandelbulb.diffuse_color[2] = input_vector[2];
-		}else if(type_of_field == Specular_Color){
-			if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
-				fprintf(stderr, "Error: Specular color values must be between 0 and 1, line:%d\n", line);
-				exit(1);
-			}
-			if(input_vector[0] < 0 || input_vector[1] < 0 || input_vector[2] < 0){
-				fprintf(stderr, "Error: Specular color values may not be negative, line:%d\n", line);
-				exit(1);
-			}
-			input_object->mandelbulb.specular_color[0] = input_vector[0];
-			input_object->mandelbulb.specular_color[1] = input_vector[1];
-			input_object->mandelbulb.specular_color[2] = input_vector[2];
-		}else if(type_of_field == Position){
-			input_object->mandelbulb.position[0] = input_vector[0];
-			input_object->mandelbulb.position[1] = input_vector[1];
-			input_object->mandelbulb.position[2] = input_vector[2];
-		}else if(type_of_field == Reflectivity){
-			if(input_value + input_object->mandelbulb.refractivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->mandelbulb.reflectivity = input_value;
-		}else if(type_of_field == Refractivity){
-			if(input_value + input_object->mandelbulb.reflectivity > 1 || input_value < 0){
-				fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-				exit(1);
-			}
-			input_object->mandelbulb.refractivity = input_value;
-		}else if(type_of_field == Ior){
-			if(input_value < 1) input_value = 1;
-			input_object->mandelbulb.ior = input_value;
-		}else{
-			fprintf(stderr, "Error: Mandelbulbs only have 'specular_color', 'diffuse_color', or 'position' fields, line:%d\n", line);
-			exit(1);
-		}
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
 		if(type_of_field == Position){
-			input_object->light.position[0] = input_vector[0];
-			input_object->light.position[1] = input_vector[1];
-			input_object->light.position[2] = input_vector[2];
+			input_object->position[0] = input_vector[0];
+			input_object->position[1] = input_vector[1];
+			input_object->position[2] = input_vector[2];
 		}else if(type_of_field == Color){
 			input_object->light.color[0] = input_vector[0];
 			input_object->light.color[1] = input_vector[1];

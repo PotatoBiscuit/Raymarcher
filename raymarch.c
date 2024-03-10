@@ -100,18 +100,18 @@ double all_intersections( double* position ){
 	while(parse_count < object_counter + 1){	//do the raymarching with a ray
 
 		if(object_array[parse_count]->kind == Sphere){
-			temp_distance = sphere_sdf( position, object_array[parse_count]->sphere.position,
+			temp_distance = sphere_sdf( position, object_array[parse_count]->position,
 						object_array[parse_count]->sphere.radius );
 			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
-			temp_distance = plane_sdf( position, object_array[parse_count]->plane.position,
+			temp_distance = plane_sdf( position, object_array[parse_count]->position,
 						object_array[parse_count]->plane.normal );
 
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
-			temp_distance = mandelbulb_sdf( position, object_array[parse_count]->mandelbulb.position );
+			temp_distance = mandelbulb_sdf( position, object_array[parse_count]->position );
 			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it
@@ -199,16 +199,16 @@ void calculate_color( double* color, Intersect* intersection ){
 	Object* light = find_light();
 
 	double light_direction[3];
-	light_direction[0] = intersection->position[0] - light->light.position[0];
-	light_direction[1] = intersection->position[1] - light->light.position[1];
-	light_direction[2] = intersection->position[2] - light->light.position[2];
+	light_direction[0] = intersection->position[0] - light->position[0];
+	light_direction[1] = intersection->position[1] - light->position[1];
+	light_direction[2] = intersection->position[2] - light->position[2];
 	normalize( light_direction );
 
 	double intersect_to_light[3] = {-light_direction[0], -light_direction[1], -light_direction[2]};
 
 	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
 
-	double shadow_mult = calculate_shadow( light->light.position, light_direction, intersection->position );
+	double shadow_mult = calculate_shadow( light->position, light_direction, intersection->position );
 
 	color[0] = diffuse_intensity;
 	color[1] = 0;
