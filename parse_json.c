@@ -195,11 +195,8 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
     }else if (input_object->kind == Mandelbulb){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
-		if(type_of_field == Position){
-			input_object->position[0] = input_vector[0];
-			input_object->position[1] = input_vector[1];
-			input_object->position[2] = input_vector[2];
-		}else if(type_of_field == Color){
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
+		if(type_of_field == Color){
 			input_object->light.color[0] = input_vector[0];
 			input_object->light.color[1] = input_vector[1];
 			input_object->light.color[2] = input_vector[2];
@@ -218,10 +215,6 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			input_object->light.angular_a0 = input_value;
 		}else if(type_of_field == Theta){
 			input_object->light.theta = input_value;
-		}else{
-			fprintf(stderr, "Error: Lights may only have the fields listed, line:%d\n", line);
-			fprintf(stderr, "Color\nPosition\nDirection\nradial-n0\nradial-n1\nradial-n2\nangular-n0\ntheta\n");
-			exit(1);
 		}
 	}else{
 		fprintf(stderr, "Error: Undefined object type, line:%d\n", line);
