@@ -17,9 +17,14 @@ make debug
 ```
 *output_file.ppm will automatically be created if it doesn't exist
 
-#### Example Result
+#### Example Results
 ```
 ./raymarcher 1000 500 ExampleScenes/BasicSphereAndWalls.json BasicSphereAndWalls.ppm
 ```
 ![](ExampleScenes/BasicSphereAndWalls.png)
-*This image manually converted from .ppm -> .png so Github can display it
+
+```
+./raymarcher 1000 500 ExampleScenes/Mandelbulb.json Mandelbulb.ppm
+```
+![](ExampleScenes/Mandelbulb.png)
+*Images manually converted from .ppm -> .png so Github can display it
