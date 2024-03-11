@@ -150,6 +150,8 @@ void store_common_fields(Object* input_object, int type_of_field, double input_v
     }else if(type_of_field == Ior){
         if(input_value < 1) input_value = 1;
         input_object->ior = input_value;
+    }else if(type_of_field == Infinite_Interval){
+        if(input_value > 0) input_object->infinite_interval = input_value;
     }
 }
 
@@ -362,70 +364,56 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                 expect_c(json, ':');
                 skip_ws(json);
                 if (strcmp(key, "width") == 0){	//Based on the field, parse a number or vector
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Width, value, NULL);	//And store the value in the object_array
+                    store_value(object_array[object_counter], Width, next_number(json), NULL);	//And store the value in the object_array
                     width = 0;
                 }else if(strcmp(key, "height") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Height, value, NULL);
+                    store_value(object_array[object_counter], Height, next_number(json), NULL);
                     height = 0;
                 }else if(strcmp(key, "radius") == 0) {
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Radius, value, NULL);
+                    store_value(object_array[object_counter], Radius, next_number(json), NULL);
                     radius = 0;
                 }else if (strcmp(key, "color") == 0){
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Color, 0, value);
+                    store_value(object_array[object_counter], Color, 0, next_vector(json));
                     color = 0;
                 }else if(strcmp(key, "position") == 0){
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Position, 0, value);
+                    store_value(object_array[object_counter], Position, 0, next_vector(json));
                     position = 0;
                 }else if(strcmp(key, "normal") == 0) {
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Normal, 0, value);
+                    store_value(object_array[object_counter], Normal, 0, next_vector(json));
                     normal = 0;
                 }else if(strcmp(key, "diffuse_color") == 0){
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Diffuse_Color, 0, value);
+                    store_value(object_array[object_counter], Diffuse_Color, 0, next_vector(json));
                     diffuse_color = 0;
                 }else if(strcmp(key, "specular_color") == 0){
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Specular_Color, 0, value);
+                    store_value(object_array[object_counter], Specular_Color, 0, next_vector(json));
                     specular_color = 0;
                 }else if(strcmp(key, "radial-a0") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Radial_A0, value, NULL);
+                    store_value(object_array[object_counter], Radial_A0, next_number(json), NULL);
                     radial_a0 = 0;
                 }else if(strcmp(key, "radial-a1") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Radial_A1, value, NULL);
+                    store_value(object_array[object_counter], Radial_A1, next_number(json), NULL);
                     radial_a1 = 0;
                 }else if(strcmp(key, "radial-a2") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Radial_A2, value, NULL);
+                    store_value(object_array[object_counter], Radial_A2, next_number(json), NULL);
                     radial_a2 = 0;
                 }else if(strcmp(key, "angular-a0") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Angular_A0, value, NULL);
+                    store_value(object_array[object_counter], Angular_A0, next_number(json), NULL);
                     angular_a0 = 0;
                 }else if(strcmp(key, "direction") == 0){
-                    double* value = next_vector(json);
-                    store_value(object_array[object_counter], Direction, 0, value);
+                    store_value(object_array[object_counter], Direction, 0, next_vector(json));
                 }else if(strcmp(key, "theta") == 0){
                     double value = next_number(json);
                     store_value(object_array[object_counter], Theta, degrees_to_radians(value), NULL);
                     theta = 0;
                 }else if(strcmp(key, "reflectivity") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Reflectivity, value, NULL);
+                    store_value(object_array[object_counter], Reflectivity, next_number(json), NULL);
                 }else if(strcmp(key, "refractivity") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Refractivity, value, NULL);
+                    store_value(object_array[object_counter], Refractivity, next_number(json), NULL);
                 }else if(strcmp(key, "ior") == 0){
-                    double value = next_number(json);
-                    store_value(object_array[object_counter], Ior, value, NULL);
+                    store_value(object_array[object_counter], Ior, next_number(json), NULL);
                     ior = 0;
+                }else if(strcmp(key, "infinite_interval") == 0){
+                    store_value( object_array[object_counter], Infinite_Interval, next_number(json), NULL);
                 }else{	//If there was an invalid field, throw an error
                         fprintf(stderr, "Error: Unknown property, \"%s\", on line %d.\n",
                         key, line);

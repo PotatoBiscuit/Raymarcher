@@ -93,25 +93,40 @@ double mandelbulb_sdf( double* position, double* mandelbulb_position ){
 	return 0.5 * log(r)*r/dr;
 }
 
+double infinite_shape( double* position, double tile_size ){
+	int unit_pos[3] = { 
+		(int) round(position[0] / tile_size),
+		(int) round(position[1] / tile_size),
+		(int) round(position[2] / tile_size)
+	};
+	position[0] -= tile_size * unit_pos[0];
+	position[1] -= tile_size * unit_pos[1];
+	position[2] -= tile_size * unit_pos[2];
+}
+
 double all_intersections( double* position ){
-    double temp_distance = INFINITY;
+    double temp_distance;
 	double temp_min_distance = INFINITY;
 	int parse_count = 1;
-	while(parse_count < object_counter + 1){	//do the raymarching with a ray
+	double temp_position[3] = {position[0], position[1], position[2]};
+	while( parse_count < object_counter + 1 ){	//do the raymarching with a ray
+		if( object_array[parse_count]->infinite_interval > 0 ){
+			infinite_shape( temp_position, object_array[parse_count]->infinite_interval );
+		}
 
-		if(object_array[parse_count]->kind == Sphere){
-			temp_distance = sphere_sdf( position, object_array[parse_count]->position,
+		if( object_array[parse_count]->kind == Sphere ){
+			temp_distance = sphere_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->sphere.radius );
 			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
-		}else if(object_array[parse_count]->kind == Plane){ //See if a plane overshadows our point of intersection
-			temp_distance = plane_sdf( position, object_array[parse_count]->position,
+		}else if( object_array[parse_count]->kind == Plane ){ //See if a plane overshadows our point of intersection
+			temp_distance = plane_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->plane.normal );
 
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
-			temp_distance = mandelbulb_sdf( position, object_array[parse_count]->position );
+			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position );
 			
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it

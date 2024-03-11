@@ -19,12 +19,17 @@ make debug
 
 #### Example Results
 ```
-./raymarcher 1000 500 ExampleScenes/BasicSphereAndWalls.json BasicSphereAndWalls.ppm
+./raymarcher 1000 500 ExampleScenes/BasicSphereAndWalls.json ExampleScenes/BasicSphereAndWalls.ppm
 ```
 ![](ExampleScenes/BasicSphereAndWalls.png)
 
 ```
-./raymarcher 1400 700 ExampleScenes/Mandelbulb.json Mandelbulb.ppm
+./raymarcher 1400 700 ExampleScenes/Mandelbulb.json ExampleScenes/Mandelbulb.ppm
 ```
 ![](ExampleScenes/Mandelbulb.png)
+
+```
+./raymarcher 1000 500 ExampleScenes/InfiniteSphere.json ExampleScenes/InfiniteSphere.ppm
+```
+![](ExampleScenes/InfiniteSphere.png)
 *Images manually converted from .ppm -> .png so Github can display it

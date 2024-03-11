@@ -18,6 +18,7 @@ typedef struct {	//Create structure to be used for our object_array
 	double reflectivity;
 	double refractivity;
 	double ior;
+	double infinite_interval;
 	union {
 		struct {
 			double width;
@@ -63,7 +64,8 @@ typedef enum {
 	Theta,
 	Reflectivity,
 	Refractivity,
-	Ior
+	Ior,
+	Infinite_Interval
 } FieldType;
 
 #endif
