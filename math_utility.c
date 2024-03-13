@@ -1,6 +1,13 @@
 #include <math.h>
 #include "math_utility.h"
 
+double max( double value1, double value2 ) {
+	if( value1 > value2 ){
+		return value1;
+	}
+	return value2;
+}
+
 double min( double value1, double value2 ) {
 	if( value1 < value2 ){
 		return value1;

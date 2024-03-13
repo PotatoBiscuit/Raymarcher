@@ -208,29 +208,56 @@ double calculate_shadow( double* light_pos, double* light_direction, double* int
 	return 0.25; //Reduce color to 25% brightness
 }
 
-void calculate_color( double* color, Intersect* intersection ){
+void reflect( double* ray, double* normal, double* result ){
+	double dot_ray_norm = dot_product( ray, normal );
+	result[0] = ray[0] - 2 * dot_ray_norm * normal[0];
+	result[1] = ray[1] - 2 * dot_ray_norm * normal[1];
+	result[2] = ray[2] - 2 * dot_ray_norm * normal[2];
+}
+
+void specular_color( double* color, double* camera_direction, double* normal, double* intersect_to_light, Object* light ){
+	double reflected_vector[3];
+	reflect( intersect_to_light, normal, reflected_vector );
+
+	double specular_intensity = pow( max( 0,dot_product( reflected_vector, camera_direction ) ), 10);
+
+	color[0] += specular_intensity * light->light.color[0];
+	color[1] += specular_intensity * light->light.color[1];
+	color[2] += specular_intensity * light->light.color[2];
+
+}
+
+void diffuse_color( double* color, double* normal, double* intersect_to_light, Object* light, Intersect* intersection ){
+	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
+
+	color[0] = light->light.color[0] * object_array[intersection->best_index]->diffuse_color[0] * diffuse_intensity;
+	color[1] = light->light.color[1] * object_array[intersection->best_index]->diffuse_color[1] * diffuse_intensity;
+	color[2] = light->light.color[2] * object_array[intersection->best_index]->diffuse_color[2] * diffuse_intensity;
+}
+
+void calculate_color( double* camera_direction, double* color, Intersect* intersection ){
 	double normal[3] = {0.0, 0.0, 0.0};
 	intersect_normal(normal, intersection->position);
 
 	Object* light = find_light();
 
-	double light_direction[3];
-	light_direction[0] = intersection->position[0] - light->position[0];
-	light_direction[1] = intersection->position[1] - light->position[1];
-	light_direction[2] = intersection->position[2] - light->position[2];
-	normalize( light_direction );
+	double intersect_to_light[3];
+	intersect_to_light[0] = light->position[0] - intersection->position[0];
+	intersect_to_light[1] = light->position[1] - intersection->position[1];
+	intersect_to_light[2] = light->position[2] - intersection->position[2];
+	normalize( intersect_to_light );
 
-	double intersect_to_light[3] = {-light_direction[0], -light_direction[1], -light_direction[2]};
+	double light_to_intersect[3] = {-intersect_to_light[0], -intersect_to_light[1], -intersect_to_light[2]};
 
-	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
+	diffuse_color( color, normal, intersect_to_light, light, intersection );
+	specular_color( color, camera_direction, normal, intersect_to_light, light );
 
-	double shadow_mult = calculate_shadow( light->position, light_direction, intersection->position );
-
-	color[0] = diffuse_intensity;
-	color[1] = 0;
-	color[2] = 0;
-
+	double shadow_mult = calculate_shadow( light->position, light_to_intersect, intersection->position );
 	vector_mult( color, shadow_mult );
+
+	color[0] = clamp( color[0] );
+	color[1] = clamp( color[1] );
+	color[2] = clamp( color[2] );
 }
 
 void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our object_array
@@ -239,7 +266,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 	int i;
 	double Ro[3];
 	double Rd[3];
-	double color[3];
+	double color[3] = {0,0,0};
 	double cx = 0;
 	double cy = 0;
 	double w;
@@ -275,7 +302,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 
 			
 			if(intersection->min_distance != INFINITY){	//If our closest intersection is valid...
-				calculate_color(color, intersection);
+				calculate_color(Rd, color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][1] = color[1];
