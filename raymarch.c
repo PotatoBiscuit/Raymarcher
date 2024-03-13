@@ -154,21 +154,20 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
 	Intersect* intersection = malloc(sizeof(Intersect));
 	int num_steps = 0;
 
-    double temp_ray_position[3] = {Ro[0], Ro[1], Ro[2]};
+	intersection->position[0] = Ro[0];
+	intersection->position[1] = Ro[1];
+	intersection->position[2] = Ro[2];
 	
     while(num_steps++ < MAX_STEPS){
-		all_intersections( temp_ray_position, intersection );
-        temp_ray_position[0] += Rd[0]*intersection->min_distance;
-        temp_ray_position[1] += Rd[1]*intersection->min_distance;
-        temp_ray_position[2] += Rd[2]*intersection->min_distance;
+		all_intersections( intersection->position, intersection );
+        intersection->position[0] += Rd[0]*intersection->min_distance;
+        intersection->position[1] += Rd[1]*intersection->min_distance;
+        intersection->position[2] += Rd[2]*intersection->min_distance;
         if( intersection->min_distance < INTERSECTION_LIMIT || intersection->min_distance > OUTER_BOUNDS ) {
             break;
         }
     }
 
-	intersection->position[0] = temp_ray_position[0];
-	intersection->position[1] = temp_ray_position[1];
-	intersection->position[2] = temp_ray_position[2];
 	return intersection;
 }
 
