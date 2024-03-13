@@ -152,9 +152,6 @@ double all_intersections( double* position, Intersect* intersect ){
 
 Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
 	Intersect* intersection = malloc(sizeof(Intersect));
-	int parse_count = 1;
-	double closest_distance = INFINITY;
-	int best_index = -1;
 	int num_steps = 0;
 
     double temp_ray_position[3] = {Ro[0], Ro[1], Ro[2]};
@@ -165,12 +162,6 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
         temp_ray_position[1] += Rd[1]*intersection->min_distance;
         temp_ray_position[2] += Rd[2]*intersection->min_distance;
         if( intersection->min_distance < INTERSECTION_LIMIT || intersection->min_distance > OUTER_BOUNDS ) {
-			if( intersection->min_distance < OUTER_BOUNDS ) {
-                closest_distance = distance_between(temp_ray_position, Ro);
-            }
-			else {
-				closest_distance = INFINITY;
-			}
             break;
         }
     }
