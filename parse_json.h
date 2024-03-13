@@ -15,8 +15,7 @@ typedef struct {	//Create structure to be used for our object_array
 	double diffuse_color[3];
 	double specular_color[3];
 	double position[3];
-	double reflectivity;
-	double refractivity;
+	double shininess;
 	double ior;
 	double infinite_interval;
 	union {
@@ -62,8 +61,7 @@ typedef enum {
 	Color,
 	Direction,
 	Theta,
-	Reflectivity,
-	Refractivity,
+	Shininess,
 	Ior,
 	Infinite_Interval
 } FieldType;

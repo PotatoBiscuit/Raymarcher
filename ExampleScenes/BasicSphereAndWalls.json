@@ -10,8 +10,7 @@
         "diffuse_color": [1, 0, 0],
         "specular_color": [1, 1, 1],
         "ior": 1,
-        "reflectivity": 0.5,
-        "refractivity": 0.5,
+        "shininess": 20,
         "position": [0, 0, 3]
     },
     {
@@ -19,8 +18,6 @@
         "normal": [0, 1, 0],
         "diffuse_color": [0, 1, 0],
         "specular_color": [1, 1, 1],
-        "reflectivity": 0.5,
-        "refractivity": 0,
         "position": [0, -1, 0]
     },
     {
@@ -29,13 +26,11 @@
         "diffuse_color": [0, 1, 0],
         "specular_color": [1, 1, 1],
         "ior": 0,
-        "reflectivity": 0,
-        "refractivity": 0,
         "position": [0, -1, 10]
     },
     {
         "type": "light",
-        "color": [2, 2, 2],
+        "color": [1, 1, 1],
         "theta": 0,
         "radial-a2": 0.125,
         "radial-a1": 0.125,

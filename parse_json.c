@@ -135,18 +135,8 @@ void store_common_fields(Object* input_object, int type_of_field, double input_v
         input_object->position[0] = input_vector[0];
         input_object->position[1] = input_vector[1];
         input_object->position[2] = input_vector[2];
-    }else if(type_of_field == Reflectivity){
-        if(input_value + input_object->refractivity > 1 || input_value < 0){
-            fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-            exit(1);
-        }
-        input_object->reflectivity = input_value;
-    }else if(type_of_field == Refractivity){
-        if(input_value + input_object->reflectivity > 1 || input_value < 0){
-            fprintf(stderr, "Reflectivity and refractivity fields must add up to less than 1, and be greater or equal to 0, Line:%d\n", line);
-            exit(1);
-        }
-        input_object->refractivity = input_value;
+    }else if(type_of_field == Shininess){
+        input_object->shininess = input_value;
     }else if(type_of_field == Ior){
         if(input_value < 1) input_value = 1;
         input_object->ior = input_value;
@@ -405,10 +395,8 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                     double value = next_number(json);
                     store_value(object_array[object_counter], Theta, degrees_to_radians(value), NULL);
                     theta = 0;
-                }else if(strcmp(key, "reflectivity") == 0){
-                    store_value(object_array[object_counter], Reflectivity, next_number(json), NULL);
-                }else if(strcmp(key, "refractivity") == 0){
-                    store_value(object_array[object_counter], Refractivity, next_number(json), NULL);
+                }else if(strcmp(key, "shininess") == 0){
+                    store_value(object_array[object_counter], Shininess, next_number(json), NULL);
                 }else if(strcmp(key, "ior") == 0){
                     store_value(object_array[object_counter], Ior, next_number(json), NULL);
                     ior = 0;

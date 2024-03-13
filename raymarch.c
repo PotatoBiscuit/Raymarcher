@@ -215,24 +215,23 @@ void reflect( double* ray, double* normal, double* result ){
 	result[2] = ray[2] - 2 * dot_ray_norm * normal[2];
 }
 
-void specular_color( double* color, double* camera_direction, double* normal, double* intersect_to_light, Object* light ){
+void diffuse_color( double* color, double* normal, double* intersect_to_light, Object* light, Object* object ){
+	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
+
+	color[0] = light->light.color[0] * object->diffuse_color[0] * diffuse_intensity;
+	color[1] = light->light.color[1] * object->diffuse_color[1] * diffuse_intensity;
+	color[2] = light->light.color[2] * object->diffuse_color[2] * diffuse_intensity;
+}
+
+void specular_color( double* color, double* camera_direction, double* normal, double* intersect_to_light, Object* light, Object* object ){
 	double reflected_vector[3];
 	reflect( intersect_to_light, normal, reflected_vector );
 
-	double specular_intensity = pow( max( 0,dot_product( reflected_vector, camera_direction ) ), 10);
+	double specular_intensity = pow( max( 0,dot_product( reflected_vector, camera_direction ) ), object->shininess );
 
-	color[0] += specular_intensity * light->light.color[0];
-	color[1] += specular_intensity * light->light.color[1];
-	color[2] += specular_intensity * light->light.color[2];
-
-}
-
-void diffuse_color( double* color, double* normal, double* intersect_to_light, Object* light, Intersect* intersection ){
-	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
-
-	color[0] = light->light.color[0] * object_array[intersection->best_index]->diffuse_color[0] * diffuse_intensity;
-	color[1] = light->light.color[1] * object_array[intersection->best_index]->diffuse_color[1] * diffuse_intensity;
-	color[2] = light->light.color[2] * object_array[intersection->best_index]->diffuse_color[2] * diffuse_intensity;
+	color[0] += specular_intensity * light->light.color[0] * min(1, object->shininess / 10.0);
+	color[1] += specular_intensity * light->light.color[1] * min(1, object->shininess / 10.0);
+	color[2] += specular_intensity * light->light.color[2] * min(1, object->shininess / 10.0);
 }
 
 void calculate_color( double* camera_direction, double* color, Intersect* intersection ){
@@ -249,8 +248,8 @@ void calculate_color( double* camera_direction, double* color, Intersect* inters
 
 	double light_to_intersect[3] = {-intersect_to_light[0], -intersect_to_light[1], -intersect_to_light[2]};
 
-	diffuse_color( color, normal, intersect_to_light, light, intersection );
-	specular_color( color, camera_direction, normal, intersect_to_light, light );
+	diffuse_color( color, normal, intersect_to_light, light, object_array[ intersection->best_index ] );
+	specular_color( color, camera_direction, normal, intersect_to_light, light, object_array[ intersection->best_index ] );
 
 	double shadow_mult = calculate_shadow( light->position, light_to_intersect, intersection->position );
 	vector_mult( color, shadow_mult );
