@@ -3,7 +3,7 @@
 
 typedef struct{	//Holds object intersection information
 	int best_index;
-	double best_t;
+	double min_distance;
     double position[3];
 } Intersect;
 

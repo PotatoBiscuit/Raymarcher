@@ -104,7 +104,17 @@ double infinite_shape( double* position, double tile_size ){
 	position[2] -= tile_size * unit_pos[2];
 }
 
-double all_intersections( double* position ){
+void store_obj_data( double temp_distance, double temp_min_distance, int obj_index, Intersect* intersect ){
+	if( intersect != NULL ){
+		if( temp_distance < temp_min_distance ){
+			intersect->best_index = obj_index;
+			intersect->min_distance = temp_distance;
+		}
+	}
+}
+
+// There are TWO ways to get results from this function, the double using normal return logic, and the Intersect* arg for extra object data
+double all_intersections( double* position, Intersect* intersect ){
     double temp_distance;
 	double temp_min_distance = INFINITY;
 	int parse_count = 1;
@@ -117,17 +127,20 @@ double all_intersections( double* position ){
 		if( object_array[parse_count]->kind == Sphere ){
 			temp_distance = sphere_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->sphere.radius );
-			
+
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if( object_array[parse_count]->kind == Plane ){ //See if a plane overshadows our point of intersection
 			temp_distance = plane_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->plane.normal );
 
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
 			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position );
 			
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else{	//If a light was found, skip it
 			//do nothing
@@ -146,14 +159,13 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
 
     double temp_ray_position[3] = {Ro[0], Ro[1], Ro[2]};
 	
-	double temp_min_distance = INFINITY;
     while(num_steps++ < MAX_STEPS){
-		temp_min_distance = all_intersections( temp_ray_position );
-        temp_ray_position[0] += Rd[0]*temp_min_distance;
-        temp_ray_position[1] += Rd[1]*temp_min_distance;
-        temp_ray_position[2] += Rd[2]*temp_min_distance;
-        if( temp_min_distance < INTERSECTION_LIMIT || temp_min_distance > OUTER_BOUNDS ) {
-			if( temp_min_distance < OUTER_BOUNDS ) {
+		all_intersections( temp_ray_position, intersection );
+        temp_ray_position[0] += Rd[0]*intersection->min_distance;
+        temp_ray_position[1] += Rd[1]*intersection->min_distance;
+        temp_ray_position[2] += Rd[2]*intersection->min_distance;
+        if( intersection->min_distance < INTERSECTION_LIMIT || intersection->min_distance > OUTER_BOUNDS ) {
+			if( intersection->min_distance < OUTER_BOUNDS ) {
                 closest_distance = distance_between(temp_ray_position, Ro);
             }
 			else {
@@ -163,7 +175,6 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
         }
     }
 
-	intersection->best_t = closest_distance;
 	intersection->position[0] = temp_ray_position[0];
 	intersection->position[1] = temp_ray_position[1];
 	intersection->position[2] = temp_ray_position[2];
@@ -178,12 +189,12 @@ void intersect_normal( double* normal, double* intersect_pos ){
 	double y = intersect_pos[1];
 	double z = intersect_pos[2];
 
-	normal[0] = all_intersections((double[3]){x + sampling_interval, y, z}) -
-				all_intersections((double[3]){x - sampling_interval, y, z});
-	normal[1] = all_intersections((double[3]){x, y + sampling_interval, z}) -
-				all_intersections((double[3]){x, y - sampling_interval, z});
-	normal[2] = all_intersections((double[3]){x, y, z + sampling_interval}) -
-				all_intersections((double[3]){x, y, z - sampling_interval});
+	normal[0] = all_intersections((double[3]){x + sampling_interval, y, z}, NULL) -
+				all_intersections((double[3]){x - sampling_interval, y, z}, NULL);
+	normal[1] = all_intersections((double[3]){x, y + sampling_interval, z}, NULL) -
+				all_intersections((double[3]){x, y - sampling_interval, z}, NULL);
+	normal[2] = all_intersections((double[3]){x, y, z + sampling_interval}, NULL) -
+				all_intersections((double[3]){x, y, z - sampling_interval}, NULL);
 
 	normalize(normal);
 }
@@ -273,7 +284,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 			intersection = raymarch(Ro, Rd);
 
 			
-			if(intersection->best_t != INFINITY){	//If our closest intersection is valid...
+			if(intersection->min_distance != INFINITY){	//If our closest intersection is valid...
 				calculate_color(color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];
