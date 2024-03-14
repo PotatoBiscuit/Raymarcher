@@ -87,12 +87,16 @@ void matrix_cross_mult( double a[][3], double b[][3], double result[][3] ){
 	}
 }
 
-void matrix_cross_mult_sp( double* a, double b[][3], double* result ){
+void matrix_cross_mult_sp( double* a, double b[][3] ){
+	double temp_result[3] = {0.0};
 	for( int i = 0; i < MATRIX_SIZE; i++ ){
-		result[i] = 0;
 		for( int k = 0; k < MATRIX_SIZE; k++ ){
-			result[i] += a[k] * b[k][i];
+			temp_result[i] += a[k] * b[k][i];
 		}
+	}
+
+	for( int i = 0; i < MATRIX_SIZE; i++ ){
+		a[i] = temp_result[i];
 	}
 }
 
@@ -137,8 +141,32 @@ void get_rotation_matrix( double matrix[][3], double* rotation_axis, double thet
 	add_matrices( matrix, K_cross_cos );
 }
 
-void apply_rotation( double* input, double* rotation_axis, double theta, double* result ){
+void apply_rotation( double* input, double* rotation_axis, double theta ){
 	double rotation_matrix[3][3] = {0.0};
 	get_rotation_matrix( rotation_matrix, rotation_axis, theta );
-	matrix_cross_mult_sp( input, rotation_matrix, result );
+	matrix_cross_mult_sp( input, rotation_matrix );
+}
+
+void vect_degrees_to_radians( double* input ){
+	input[0] = degrees_to_radians(input[0]);
+	input[1] = degrees_to_radians(input[1]);
+	input[2] = degrees_to_radians(input[2]);
+}
+
+void apply_xyz_rotation( double* input, double* direction ){
+	double x_axis[3] = {1.0, 0.0, 0.0};
+	double y_axis[3] = {0.0, 1.0, 0.0};
+	double z_axis[3] = {0.0, 0.0, 1.0};
+
+	if( direction[0] != 0.0 ){
+		apply_rotation( input, x_axis, direction[0] );
+	}
+
+	if( direction[1] != 0.0 ){
+		apply_rotation( input, y_axis, direction[1] );
+	}
+
+	if( direction[2] != 0.0 ){
+		apply_rotation( input, z_axis, direction[2] );
+	}
 }

@@ -18,6 +18,8 @@ double clamp( double input );
 void vector_add( double* input, double num );
 void vector_mult( double* input, double num );
 
-void apply_rotation( double* input, double* rotation_axis, double theta, double* result );
+void vect_degrees_to_radians( double* input );
+
+void apply_xyz_rotation( double* input, double* direction );
 
 #endif

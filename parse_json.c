@@ -186,6 +186,12 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 		}
     }else if (input_object->kind == Mandelbulb){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
+        if( type_of_field  == Rotation ){
+            input_object->mandelbulb.rotation[0] = input_vector[0];
+            input_object->mandelbulb.rotation[1] = input_vector[1];
+            input_object->mandelbulb.rotation[2] = input_vector[2];
+            vect_degrees_to_radians( input_object->mandelbulb.rotation );
+        }
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
         store_common_fields(input_object, type_of_field, input_value, input_vector);
 		if(type_of_field == Color){
@@ -391,6 +397,8 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                     angular_a0 = 0;
                 }else if(strcmp(key, "direction") == 0){
                     store_value(object_array[object_counter], Direction, 0, next_vector(json));
+                }else if(strcmp(key, "rotation") == 0){
+                    store_value(object_array[object_counter], Rotation, 0, next_vector(json));
                 }else if(strcmp(key, "theta") == 0){
                     double value = next_number(json);
                     store_value(object_array[object_counter], Theta, degrees_to_radians(value), NULL);

@@ -70,13 +70,10 @@ double plane_sdf( double* position, double* plane_point, double* plane_normal ){
 	return dot_product( difference, plane_normal );
 }
 
-double mandelbulb_sdf( double* position, double* mandelbulb_position ){
+double mandelbulb_sdf( double* position, double* mandelbulb_position, double* direction ){
 	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
-	double rotated_pos[3];
-	double rotation_axis[3] = {0.0, 1.0, 0.0};
-	normalize( rotation_axis );
-	apply_rotation( adjusted_pos, rotation_axis, 90.0, rotated_pos );
-	double temp_pos[3] = {rotated_pos[0], rotated_pos[1], rotated_pos[2]};
+	apply_xyz_rotation( adjusted_pos, direction );
+	double temp_pos[3] = {adjusted_pos[0], adjusted_pos[1], adjusted_pos[2]};
 
 	double dr = 1.0;
 	double r;
@@ -91,9 +88,9 @@ double mandelbulb_sdf( double* position, double* mandelbulb_position ){
 
 		double zr = pow( r, power );
 
-		temp_pos[0] = rotated_pos[0] + zr * sin(theta) * cos(phi);
-		temp_pos[1] = rotated_pos[1] + zr * sin(theta) * sin(phi);
-		temp_pos[2] = rotated_pos[2] + zr * cos(theta);
+		temp_pos[0] = adjusted_pos[0] + zr * sin(theta) * cos(phi);
+		temp_pos[1] = adjusted_pos[1] + zr * sin(theta) * sin(phi);
+		temp_pos[2] = adjusted_pos[2] + zr * cos(theta);
 	}
 	return 0.5 * log(r)*r/dr;
 }
@@ -143,7 +140,8 @@ double all_intersections( double* position, Intersect* intersect ){
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
-			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position );
+			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position,
+						object_array[parse_count]->mandelbulb.rotation );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );

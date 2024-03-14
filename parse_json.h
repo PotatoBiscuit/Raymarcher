@@ -30,7 +30,7 @@ typedef struct {	//Create structure to be used for our object_array
 			double normal[3];
 		} plane;
 		struct {
-			// For any specific mandelbulb fields
+			double rotation[3];
 		} mandelbulb;
 		struct {
 			double color[3];
@@ -60,6 +60,7 @@ typedef enum {
 	Angular_A0,
 	Color,
 	Direction,
+	Rotation,
 	Theta,
 	Shininess,
 	Ior,
