@@ -70,6 +70,13 @@ void vector_mult_sp( double* input, double num, double* result ){
 	result[2] = input[2] * num;
 }
 
+void reflect( double* ray, double* normal, double* result ){
+	double dot_ray_norm = dot_product( ray, normal );
+	result[0] = ray[0] - 2 * dot_ray_norm * normal[0];
+	result[1] = ray[1] - 2 * dot_ray_norm * normal[1];
+	result[2] = ray[2] - 2 * dot_ray_norm * normal[2];
+}
+
 void matrix_mult( double input[][3], double num, double result[][3] ){
 	vector_mult_sp( input[0], num, result[0] );
 	vector_mult_sp( input[1], num, result[1] );

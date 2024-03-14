@@ -211,13 +211,6 @@ double calculate_shadow( double* light_pos, double* light_direction, double* int
 	return 0.25; //Reduce color to 25% brightness
 }
 
-void reflect( double* ray, double* normal, double* result ){
-	double dot_ray_norm = dot_product( ray, normal );
-	result[0] = ray[0] - 2 * dot_ray_norm * normal[0];
-	result[1] = ray[1] - 2 * dot_ray_norm * normal[1];
-	result[2] = ray[2] - 2 * dot_ray_norm * normal[2];
-}
-
 void diffuse_color( double* color, double* normal, double* intersect_to_light, Object* light, Object* object ){
 	double diffuse_intensity = clamp( dot_product( normal, intersect_to_light ) );
 
