@@ -72,7 +72,12 @@ double plane_sdf( double* position, double* plane_point, double* plane_normal ){
 
 double mandelbulb_sdf( double* position, double* mandelbulb_position ){
 	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
-	double temp_pos[3] = {adjusted_pos[0], adjusted_pos[1], adjusted_pos[2]};
+	double rotated_pos[3];
+	double rotation_axis[3] = {0.0, 1.0, 0.0};
+	normalize( rotation_axis );
+	apply_rotation( adjusted_pos, rotation_axis, 90.0, rotated_pos );
+	double temp_pos[3] = {rotated_pos[0], rotated_pos[1], rotated_pos[2]};
+
 	double dr = 1.0;
 	double r;
 	double power = 8.0;
@@ -86,9 +91,9 @@ double mandelbulb_sdf( double* position, double* mandelbulb_position ){
 
 		double zr = pow( r, power );
 
-		temp_pos[0] = adjusted_pos[0] + zr * sin(theta) * cos(phi);
-		temp_pos[1] = adjusted_pos[1] + zr * sin(theta) * sin(phi);
-		temp_pos[2] = adjusted_pos[2] + zr * cos(theta);
+		temp_pos[0] = rotated_pos[0] + zr * sin(theta) * cos(phi);
+		temp_pos[1] = rotated_pos[1] + zr * sin(theta) * sin(phi);
+		temp_pos[2] = rotated_pos[2] + zr * cos(theta);
 	}
 	return 0.5 * log(r)*r/dr;
 }

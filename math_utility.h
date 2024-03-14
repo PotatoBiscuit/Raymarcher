@@ -2,6 +2,7 @@
 #define MATH_UTILITY
 
 #define M_PI  3.14159265358979323846
+#define MATRIX_SIZE 3
 
 double max( double value1, double value2 );
 double min( double value1, double value2 );
@@ -16,5 +17,7 @@ double clamp( double input );
 
 void vector_add( double* input, double num );
 void vector_mult( double* input, double num );
+
+void apply_rotation( double* input, double* rotation_axis, double theta, double* result );
 
 #endif
