@@ -8,7 +8,9 @@ double max( double value1, double value2 );
 double min( double value1, double value2 );
 double sqr( double v );
 double degrees_to_radians( double value );
+
 double magnitude( double* input_vector );
+double magnitude_2D( double* input_vector );
 double distance_between(double* vector1, double* vector2 );
 double dot_product( double* v1, double* v2 );
 void normalize( double* vector );

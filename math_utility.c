@@ -23,8 +23,12 @@ double degrees_to_radians(double value){	//Converts input from degrees to radian
 	return 2*M_PI*value/360;
 }
 
-double magnitude(double* input_vector){	//Calculate the magnitude/distance of the input vector
+double magnitude(double* input_vector){	//Calculate the magnitude/distance of the 3D input vector
 	return sqrt(sqr(input_vector[0]) + sqr(input_vector[1]) + sqr(input_vector[2]));
+}
+
+double magnitude_2D(double* input_vector){	//Calculate the magnitude/distance of the 2D input vector
+	return sqrt(sqr(input_vector[0]) + sqr(input_vector[1]));
 }
 
 double distance_between(double* x_array, double* y_array ){

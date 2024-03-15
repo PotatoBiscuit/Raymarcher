@@ -85,6 +85,14 @@ double box_sdf( double* position, double* box_position, double* dimensions ){
 	return temp_distance + min( max( distance_vect[0], max( distance_vect[0], max( distance_vect[1], distance_vect[2] ) ) ), 0.0 );
 }
 
+double donut_sdf( double* position, double* donut_position, double radius, double thickness ){
+	double adjusted_pos[3] = {position[0] - donut_position[0], position[1] - donut_position[1], position[2] - donut_position[2]};
+	double xz[2] = {adjusted_pos[0], adjusted_pos[2]};
+	double diameter = radius * 2;
+	double donut_bounds[2] = { magnitude_2D(xz) - diameter, adjusted_pos[1] };
+	return magnitude_2D( donut_bounds ) - thickness;
+}
+
 double mandelbulb_sdf( double* position, double* mandelbulb_position, double* direction ){
 	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
 	apply_xyz_rotation( adjusted_pos, direction );
@@ -154,18 +162,28 @@ double all_intersections( double* position, Intersect* intersect ){
 
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
+
+		}else if( object_array[parse_count]->kind == Donut ){
+			temp_distance = donut_sdf( temp_position, object_array[parse_count]->position,
+						object_array[parse_count]->donut.radius, object_array[parse_count]->donut.thickness );
+
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
+			temp_min_distance = min( temp_distance, temp_min_distance );
+
 		}else if( object_array[parse_count]->kind == Box ){
 			temp_distance = box_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->box.dimensions );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
+
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
 			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->mandelbulb.rotation );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
+			
 		}else{	//If a light was found, skip it
 			//do nothing
 		}
@@ -178,6 +196,7 @@ Intersect* raymarch(double* Ro, double* Rd){	//Find object intersections
 	Intersect* intersection = malloc(sizeof(Intersect));
 	int num_steps = 0;
 
+	intersection->min_distance = INFINITY;
 	intersection->position[0] = Ro[0];
 	intersection->position[1] = Ro[1];
 	intersection->position[2] = Ro[2];
@@ -317,7 +336,7 @@ void raymarch_scene(double** pixel_buffer, int N, int M){	//This raymarches our 
 			intersection = raymarch(Ro, Rd);
 
 			
-			if(intersection->min_distance != INFINITY){	//If our closest intersection is valid...
+			if(intersection->min_distance <= OUTER_BOUNDS){	//If our closest intersection is valid...
 				calculate_color(Rd, color, intersection);
 
 				pixel_buffer[(int)((N*M) - (floor(pixel_count/N) + 1)*N)+ pixel_count%N][0] = color[0];

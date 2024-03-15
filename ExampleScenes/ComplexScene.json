@@ -11,14 +11,38 @@
         "specular_color": [1, 1, 1],
         "ior": 1,
         "shininess": 20,
-        "position": [0, 0, 3]
+        "position": [3, 0, 3]
     },
     {
         "type": "box",
         "dimensions": [0.5, 0.5, 0.5],
         "diffuse_color": [0, 1, 0],
         "specular_color": [1, 1, 1],
-        "position": [-2, 0, 3]
+        "position": [-3, 0, 3]
+    },
+    {
+        "type": "donut",
+        "radius": 0.5,
+        "thickness": 0.3,
+        "diffuse_color": [0, 0, 1],
+        "specular_color": [1, 1, 1],
+        "ior": 1,
+        "position": [0, 3, 5]
+    },
+    {
+        "type": "plane",
+        "normal": [0, 1, 0],
+        "diffuse_color": [0.5, 0.5, 0.5],
+        "specular_color": [1, 1, 1],
+        "position": [0, -1, 0]
+    },
+    {
+        "type": "plane",
+        "normal": [0, 0, 1],
+        "diffuse_color": [0.5, 0.5, 0.5],
+        "specular_color": [1, 1, 1],
+        "ior": 0,
+        "position": [0, -1, 10]
     },
     {
         "type": "light",

@@ -5,9 +5,10 @@ typedef enum {
 	Camera,
 	Sphere,
 	Plane,
-	Light,
 	Box,
-	Mandelbulb
+	Donut,
+	Mandelbulb,
+	Light
 } Primitive;
 
 typedef struct {	//Create structure to be used for our object_array
@@ -29,6 +30,10 @@ typedef struct {	//Create structure to be used for our object_array
 		struct {
 			double normal[3];
 		} plane;
+		struct {
+			double radius;
+			double thickness;
+		} donut;
 		struct {
 			double dimensions[3];
 		} box;
@@ -67,6 +72,7 @@ typedef enum {
 	Dimensions,
 	Theta,
 	Shininess,
+	Thickness,
 	Ior,
 	Infinite_Interval
 } FieldType;

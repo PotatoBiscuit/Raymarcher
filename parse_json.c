@@ -184,6 +184,13 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			}
 			normalize(input_object->plane.normal);
 		}
+    }else if( input_object->kind == Donut ){
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
+        if( type_of_field == Radius ){
+            input_object->donut.radius = input_value;
+        }else if( type_of_field == Thickness ){
+            input_object->donut.thickness = input_value;
+        }
     }else if ( input_object->kind == Box ){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
         if( type_of_field == Dimensions ){
@@ -302,6 +309,12 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
             object_array[object_counter]->kind = Plane;
             position = 1;
             normal = 1;
+            specular_color = 1;
+            diffuse_color = 1;
+            ior = 1;
+        } else if (strcmp(value, "donut") == 0) {
+            object_array[object_counter]->kind = Donut;
+            position = 1;
             specular_color = 1;
             diffuse_color = 1;
             ior = 1;
@@ -424,6 +437,8 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                     theta = 0;
                 }else if(strcmp(key, "shininess") == 0){
                     store_value(object_array[object_counter], Shininess, next_number(json), NULL);
+                }else if(strcmp(key, "thickness") == 0){
+                    store_value(object_array[object_counter], Thickness, next_number(json), NULL);
                 }else if(strcmp(key, "ior") == 0){
                     store_value(object_array[object_counter], Ior, next_number(json), NULL);
                     ior = 0;
