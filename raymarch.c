@@ -61,21 +61,26 @@ void argument_checker(int c, char** argv){	//Check input arguments for validity
 	}
 }
 
-double sphere_sdf(double* position, double* sphere_position, double radius){ //Calculate how far our ray position is from the sphere
-	return distance_between(sphere_position, position) - radius;
+double apply_transformations(double* position, double* object_position, double* object_rotation ){
+	position[0] -= object_position[0];
+	position[1] -= object_position[1];
+	position[2] -= object_position[2];
+	apply_xyz_rotation( position, object_rotation );
 }
 
-double plane_sdf( double* position, double* plane_point, double* plane_normal ){
-	double difference[3] = { position[0] - plane_point[0], position[1] - plane_point[1], position[2] - plane_point[2] };
-	return dot_product( difference, plane_normal );
+double sphere_sdf(double* position, double radius){ //Calculate how far our ray position is from the sphere
+	return magnitude(position) - radius;
 }
 
-double box_sdf( double* position, double* box_position, double* dimensions ){
-	double adjusted_pos[3] = {position[0] - box_position[0], position[1] - box_position[1], position[2] - box_position[2]};
+double plane_sdf( double* position, double* plane_normal ){
+	return dot_product( position, plane_normal );
+}
+
+double box_sdf( double* position, double* dimensions ){
 	double distance_vect[3];
-	distance_vect[0] = fabs( adjusted_pos[0] ) - dimensions[0];
-	distance_vect[1] = fabs( adjusted_pos[1] ) - dimensions[1];
-	distance_vect[2] = fabs( adjusted_pos[2] ) - dimensions[2];
+	distance_vect[0] = fabs( position[0] ) - dimensions[0];
+	distance_vect[1] = fabs( position[1] ) - dimensions[1];
+	distance_vect[2] = fabs( position[2] ) - dimensions[2];
 
 	double pos_distance_vect[3];
 	pos_distance_vect[0] = max( distance_vect[0], 0.0 );
@@ -85,18 +90,15 @@ double box_sdf( double* position, double* box_position, double* dimensions ){
 	return temp_distance + min( max( distance_vect[0], max( distance_vect[0], max( distance_vect[1], distance_vect[2] ) ) ), 0.0 );
 }
 
-double donut_sdf( double* position, double* donut_position, double radius, double thickness ){
-	double adjusted_pos[3] = {position[0] - donut_position[0], position[1] - donut_position[1], position[2] - donut_position[2]};
-	double xz[2] = {adjusted_pos[0], adjusted_pos[2]};
+double donut_sdf( double* position, double radius, double thickness ){
+	double xz[2] = {position[0], position[2]};
 	double diameter = radius * 2;
-	double donut_bounds[2] = { magnitude_2D(xz) - diameter, adjusted_pos[1] };
+	double donut_bounds[2] = { magnitude_2D(xz) - diameter, position[1] };
 	return magnitude_2D( donut_bounds ) - thickness;
 }
 
-double mandelbulb_sdf( double* position, double* mandelbulb_position, double* direction ){
-	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
-	apply_xyz_rotation( adjusted_pos, direction );
-	double temp_pos[3] = {adjusted_pos[0], adjusted_pos[1], adjusted_pos[2]};
+double mandelbulb_sdf( double* position ){
+	double temp_pos[3] = {position[0], position[1], position[2]};
 
 	double dr = 1.0;
 	double r;
@@ -111,9 +113,9 @@ double mandelbulb_sdf( double* position, double* mandelbulb_position, double* di
 
 		double zr = pow( r, power );
 
-		temp_pos[0] = adjusted_pos[0] + zr * sin(theta) * cos(phi);
-		temp_pos[1] = adjusted_pos[1] + zr * sin(theta) * sin(phi);
-		temp_pos[2] = adjusted_pos[2] + zr * cos(theta);
+		temp_pos[0] = position[0] + zr * sin(theta) * cos(phi);
+		temp_pos[1] = position[1] + zr * sin(theta) * sin(phi);
+		temp_pos[2] = position[2] + zr * cos(theta);
 	}
 	return 0.5 * log(r)*r/dr;
 }
@@ -143,47 +145,44 @@ double all_intersections( double* position, Intersect* intersect ){
     double temp_distance;
 	double temp_min_distance = INFINITY;
 	int parse_count = 1;
-	double temp_position[3] = {position[0], position[1], position[2]};
 	while( parse_count < object_counter + 1 ){	//do the raymarching with a ray
+		double temp_position[3] = {position[0], position[1], position[2]};
 		if( object_array[parse_count]->infinite_interval > 0 ){
 			infinite_shape( temp_position, object_array[parse_count]->infinite_interval );
 		}
+		apply_transformations( temp_position, object_array[parse_count]->position, object_array[parse_count]->rotation );
 
 		if( object_array[parse_count]->kind == Sphere ){
-			temp_distance = sphere_sdf( temp_position, object_array[parse_count]->position,
-						object_array[parse_count]->sphere.radius );
+			temp_distance = sphere_sdf( temp_position, object_array[parse_count]->sphere.radius );
 
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if( object_array[parse_count]->kind == Plane ){ //See if a plane overshadows our point of intersection
-			temp_distance = plane_sdf( temp_position, object_array[parse_count]->position,
-						object_array[parse_count]->plane.normal );
+			temp_distance = plane_sdf( temp_position, object_array[parse_count]->plane.normal );
 
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if( object_array[parse_count]->kind == Donut ){
-			temp_distance = donut_sdf( temp_position, object_array[parse_count]->position,
-						object_array[parse_count]->donut.radius, object_array[parse_count]->donut.thickness );
+			temp_distance = donut_sdf( temp_position, object_array[parse_count]->donut.radius,
+										object_array[parse_count]->donut.thickness );
 
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if( object_array[parse_count]->kind == Box ){
-			temp_distance = box_sdf( temp_position, object_array[parse_count]->position,
-						object_array[parse_count]->box.dimensions );
+			temp_distance = box_sdf( temp_position, object_array[parse_count]->box.dimensions );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 
 		}else if( object_array[parse_count]->kind == Mandelbulb ){
-			temp_distance = mandelbulb_sdf( temp_position, object_array[parse_count]->position,
-						object_array[parse_count]->mandelbulb.rotation );
+			temp_distance = mandelbulb_sdf( temp_position );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
-			
+
 		}else{	//If a light was found, skip it
 			//do nothing
 		}

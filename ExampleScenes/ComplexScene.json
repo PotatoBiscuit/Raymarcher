@@ -18,7 +18,8 @@
         "dimensions": [0.5, 0.5, 0.5],
         "diffuse_color": [0, 1, 0],
         "specular_color": [1, 1, 1],
-        "position": [-3, 0, 3]
+        "position": [-3, 0, 3],
+        "rotation": [-30, 30, 0]
     },
     {
         "type": "donut",

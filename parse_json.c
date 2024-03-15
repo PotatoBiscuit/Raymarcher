@@ -107,7 +107,12 @@ double* next_vector(FILE* json) {	//parse the next vector, and return it in doub
 }
 
 void store_common_fields(Object* input_object, int type_of_field, double input_value, double* input_vector){
-    if(type_of_field == Diffuse_Color){
+    if( type_of_field  == Rotation ){
+        input_object->rotation[0] = input_vector[0];
+        input_object->rotation[1] = input_vector[1];
+        input_object->rotation[2] = input_vector[2];
+        vect_degrees_to_radians( input_object->rotation );
+    }else if(type_of_field == Diffuse_Color){
         if(input_vector[0] > 1 || input_vector[1] > 1 || input_vector[2] > 1){
             fprintf(stderr, "Error: Diffuse color values must be between 0 and 1, line:%d\n", line);
             exit(1);
@@ -204,12 +209,6 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
         }
     }else if ( input_object->kind == Mandelbulb ){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
-        if( type_of_field  == Rotation ){
-            input_object->mandelbulb.rotation[0] = input_vector[0];
-            input_object->mandelbulb.rotation[1] = input_vector[1];
-            input_object->mandelbulb.rotation[2] = input_vector[2];
-            vect_degrees_to_radians( input_object->mandelbulb.rotation );
-        }
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
         store_common_fields(input_object, type_of_field, input_value, input_vector);
 		if(type_of_field == Color){

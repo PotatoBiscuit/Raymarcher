@@ -16,6 +16,7 @@ typedef struct {	//Create structure to be used for our object_array
 	double diffuse_color[3];
 	double specular_color[3];
 	double position[3];
+	double rotation[3];
 	double shininess;
 	double ior;
 	double infinite_interval;
@@ -38,7 +39,7 @@ typedef struct {	//Create structure to be used for our object_array
 			double dimensions[3];
 		} box;
 		struct {
-			double rotation[3];
+			// Put any mandelbulb specific fields here
 		} mandelbulb;
 		struct {
 			double color[3];
