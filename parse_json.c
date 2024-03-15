@@ -148,7 +148,7 @@ void store_common_fields(Object* input_object, int type_of_field, double input_v
 //This function takes an input value or vector, and puts it into our object array
 void store_value(Object* input_object, int type_of_field, double input_value, double* input_vector){
 	//if input_value or input_vector aren't used, a 0 or NULL value should be passed in
-	if(input_object->kind == Camera){	//If the object is a camera, store the input into its width or height fields
+	if( input_object->kind == Camera ){	//If the object is a camera, store the input into its width or height fields
 		if(type_of_field == Width){
 			if(input_value <= 0){
 				fprintf(stderr, "Error: Camera width must be greater than 0, line:%d\n", line);
@@ -165,12 +165,12 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			fprintf(stderr, "Error: Camera may only have 'width' or 'height' fields, line:%d\n", line);
 			exit(1);
 		}
-	}else if(input_object->kind == Sphere){	//If the object is a sphere, store input into its respective fields
+	}else if( input_object->kind == Sphere ){	//If the object is a sphere, store input into its respective fields
         store_common_fields(input_object, type_of_field, input_value, input_vector);
 		if(type_of_field == Radius){
 			input_object->sphere.radius = input_value;
 		}
-	}else if(input_object->kind == Plane){	//If the object is a plane, store input into its respective fields
+	}else if( input_object->kind == Plane ){	//If the object is a plane, store input into its respective fields
 		store_common_fields(input_object, type_of_field, input_value, input_vector);
 		if(type_of_field == Normal){
 			if(input_vector[2] > 0){
@@ -184,7 +184,18 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
 			}
 			normalize(input_object->plane.normal);
 		}
-    }else if (input_object->kind == Mandelbulb){
+    }else if ( input_object->kind == Box ){
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
+        if( type_of_field == Dimensions ){
+            input_object->box.dimensions[0] = input_vector[0];
+            input_object->box.dimensions[1] = input_vector[1];
+            input_object->box.dimensions[2] = input_vector[2];
+            if( input_vector[0] <= 0.0 && input_vector[1] <= 0.0 && input_vector[2] <= 0.0 ){
+                fprintf( stderr, "Error: One of your box dimensions was set to zero, there is a decent chance it fails to render\n" );
+            }
+
+        }
+    }else if ( input_object->kind == Mandelbulb ){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
         if( type_of_field  == Rotation ){
             input_object->mandelbulb.rotation[0] = input_vector[0];
@@ -294,6 +305,12 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
             specular_color = 1;
             diffuse_color = 1;
             ior = 1;
+        } else if (strcmp(value, "box") == 0) {
+            object_array[object_counter]->kind = Box;
+            position = 1;
+            specular_color = 1;
+            diffuse_color = 1;
+            ior = 1;
         } else if (strcmp(value, "mandelbulb") == 0) {
             object_array[object_counter]->kind = Mandelbulb;
             position = 1;
@@ -399,6 +416,8 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                     store_value(object_array[object_counter], Direction, 0, next_vector(json));
                 }else if(strcmp(key, "rotation") == 0){
                     store_value(object_array[object_counter], Rotation, 0, next_vector(json));
+                }else if(strcmp(key, "dimensions") == 0){
+                    store_value(object_array[object_counter], Dimensions, 0, next_vector(json));
                 }else if(strcmp(key, "theta") == 0){
                     double value = next_number(json);
                     store_value(object_array[object_counter], Theta, degrees_to_radians(value), NULL);

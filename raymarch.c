@@ -70,6 +70,21 @@ double plane_sdf( double* position, double* plane_point, double* plane_normal ){
 	return dot_product( difference, plane_normal );
 }
 
+double box_sdf( double* position, double* box_position, double* dimensions ){
+	double adjusted_pos[3] = {position[0] - box_position[0], position[1] - box_position[1], position[2] - box_position[2]};
+	double distance_vect[3];
+	distance_vect[0] = fabs( adjusted_pos[0] ) - dimensions[0];
+	distance_vect[1] = fabs( adjusted_pos[1] ) - dimensions[1];
+	distance_vect[2] = fabs( adjusted_pos[2] ) - dimensions[2];
+
+	double pos_distance_vect[3];
+	pos_distance_vect[0] = max( distance_vect[0], 0.0 );
+	pos_distance_vect[1] = max( distance_vect[1], 0.0 );
+	pos_distance_vect[2] = max( distance_vect[2], 0.0 );
+	double temp_distance = magnitude( pos_distance_vect );
+	return temp_distance + min( max( distance_vect[0], max( distance_vect[0], max( distance_vect[1], distance_vect[2] ) ) ), 0.0 );
+}
+
 double mandelbulb_sdf( double* position, double* mandelbulb_position, double* direction ){
 	double adjusted_pos[3] = {position[0] - mandelbulb_position[0], position[1] - mandelbulb_position[1], position[2] - mandelbulb_position[2]};
 	apply_xyz_rotation( adjusted_pos, direction );
@@ -137,6 +152,12 @@ double all_intersections( double* position, Intersect* intersect ){
 			temp_distance = plane_sdf( temp_position, object_array[parse_count]->position,
 						object_array[parse_count]->plane.normal );
 
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
+			temp_min_distance = min( temp_distance, temp_min_distance );
+		}else if( object_array[parse_count]->kind == Box ){
+			temp_distance = box_sdf( temp_position, object_array[parse_count]->position,
+						object_array[parse_count]->box.dimensions );
+			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
 		}else if( object_array[parse_count]->kind == Mandelbulb ){

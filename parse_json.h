@@ -30,6 +30,9 @@ typedef struct {	//Create structure to be used for our object_array
 			double normal[3];
 		} plane;
 		struct {
+			double dimensions[3];
+		} box;
+		struct {
 			double rotation[3];
 		} mandelbulb;
 		struct {
@@ -61,6 +64,7 @@ typedef enum {
 	Color,
 	Direction,
 	Rotation,
+	Dimensions,
 	Theta,
 	Shininess,
 	Ior,
