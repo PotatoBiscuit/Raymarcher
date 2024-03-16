@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "math_utility.h"
+#include "math/math_utility.h"
 #include "parse_json.h"
 #include "raymarch.h"
 
