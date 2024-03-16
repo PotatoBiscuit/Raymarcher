@@ -4,7 +4,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "Math/math_utility.h"
+#include "Math/simple_math.h"
+#include "Math/vector_math.h"
+#include "Math/matrix_math.h"
 #include "Parser/parse_json.h"
 #include "raymarch.h"
 
