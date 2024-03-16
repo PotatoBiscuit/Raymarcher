@@ -119,6 +119,77 @@ void add_matrices( double a[][3], double b[][3] ){
 	}
 }
 
+void vect_degrees_to_radians( double* input ){
+	input[0] = degrees_to_radians(input[0]);
+	input[1] = degrees_to_radians(input[1]);
+	input[2] = degrees_to_radians(input[2]);
+}
+
+void get_rotation_matrix_X( double matrix[][3], double theta ){
+	matrix[0][0] = 1;
+	matrix[0][1] = 0;
+	matrix[0][2] = 0;
+
+	matrix[1][0] = 0;
+	matrix[1][1] = cos( theta );
+	matrix[1][2] = -sin( theta );
+
+	matrix[2][0] = 0;
+	matrix[2][1] = sin( theta );
+	matrix[2][2] = cos( theta );
+}
+
+void get_rotation_matrix_Y( double matrix[][3], double theta ){
+	matrix[0][0] = cos( theta );
+	matrix[0][1] = 0;
+	matrix[0][2] = sin( theta );
+
+	matrix[1][0] = 0;
+	matrix[1][1] = 1;
+	matrix[1][2] = 0;
+
+	matrix[2][0] = -sin( theta );
+	matrix[2][1] = 0;
+	matrix[2][2] = cos( theta );
+}
+
+void get_rotation_matrix_Z( double matrix[][3], double theta ){
+	matrix[0][0] = cos( theta );
+	matrix[0][1] = -sin( theta );
+	matrix[0][2] = 0;
+
+	matrix[1][0] = sin( theta );
+	matrix[1][1] = cos( theta );
+	matrix[1][2] = 0;
+
+	matrix[2][0] = 0;
+	matrix[2][1] = 0;
+	matrix[2][2] = 1;
+}
+
+void apply_xyz_rotation( double* input, double* direction ){
+	double x_axis[3] = {1.0, 0.0, 0.0};
+	double y_axis[3] = {0.0, 1.0, 0.0};
+	double z_axis[3] = {0.0, 0.0, 1.0};
+
+	double rotation_matrix[3][3];
+	if( direction[0] != 0.0 ){
+		get_rotation_matrix_X(rotation_matrix, direction[0] );
+		matrix_cross_mult_sp( input, rotation_matrix );
+	}
+
+	if( direction[1] != 0.0 ){
+		get_rotation_matrix_Y(rotation_matrix, direction[1] );
+		matrix_cross_mult_sp( input, rotation_matrix );
+	}
+
+	if( direction[2] != 0.0 ){
+		get_rotation_matrix_Z(rotation_matrix, direction[2] );
+		matrix_cross_mult_sp( input, rotation_matrix );
+	}
+}
+
+// Rodrigues/Euler's matrix rotations are very cool, but slow, the below are unused for now
 void get_rotation_matrix( double matrix[][3], double* rotation_axis, double theta ){
 	double K_matrix[3][3];
 	K_matrix[0][0] = 0.0;
@@ -156,28 +227,4 @@ void apply_rotation( double* input, double* rotation_axis, double theta ){
 	double rotation_matrix[3][3] = {0.0};
 	get_rotation_matrix( rotation_matrix, rotation_axis, theta );
 	matrix_cross_mult_sp( input, rotation_matrix );
-}
-
-void vect_degrees_to_radians( double* input ){
-	input[0] = degrees_to_radians(input[0]);
-	input[1] = degrees_to_radians(input[1]);
-	input[2] = degrees_to_radians(input[2]);
-}
-
-void apply_xyz_rotation( double* input, double* direction ){
-	double x_axis[3] = {1.0, 0.0, 0.0};
-	double y_axis[3] = {0.0, 1.0, 0.0};
-	double z_axis[3] = {0.0, 0.0, 1.0};
-
-	if( direction[0] != 0.0 ){
-		apply_rotation( input, x_axis, direction[0] );
-	}
-
-	if( direction[1] != 0.0 ){
-		apply_rotation( input, y_axis, direction[1] );
-	}
-
-	if( direction[2] != 0.0 ){
-		apply_rotation( input, z_axis, direction[2] );
-	}
 }
