@@ -4,8 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "math/math_utility.h"
-#include "parse_json.h"
+#include "Math/math_utility.h"
+#include "Parser/parse_json.h"
 #include "raymarch.h"
 
 //These variables should NOT be changed after parsing the json file

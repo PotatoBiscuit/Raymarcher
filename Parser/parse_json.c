@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "math/math_utility.h"
+#include "../Math/math_utility.h"
 #include "parse_json.h"
 
 int line = 1;	//Line currently being parsed
