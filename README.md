@@ -33,3 +33,6 @@ make debug
 ```
 ![](ExampleScenes/InfiniteSphere.png)
 *Images manually converted from .ppm -> .png so Github can display it
+
+### Sources
+SDF Equations were found on Inigo Quilez's [blog](https://iquilezles.org/)
