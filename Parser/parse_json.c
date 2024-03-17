@@ -208,6 +208,18 @@ void store_value(Object* input_object, int type_of_field, double input_value, do
             }
 
         }
+    }else if( input_object->kind == Cone ){
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
+        if( type_of_field == Angle ){
+			input_object->cone.angle = degrees_to_radians( input_value );
+		}else if(type_of_field == Height ){
+            input_object->cone.height = input_value;
+        }
+    }else if( input_object->kind == EternalCylinder ){
+        store_common_fields(input_object, type_of_field, input_value, input_vector);
+        if(type_of_field == Radius){
+			input_object->eternal_cylinder.radius = input_value;
+		}
     }else if ( input_object->kind == Mandelbulb ){
         store_common_fields(input_object, type_of_field, input_value, input_vector);
 	}else if(input_object->kind == Light){	//If object is a light, store input into its respective fields
@@ -320,6 +332,18 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
             ior = 1;
         } else if (strcmp(value, "box") == 0) {
             object_array[object_counter]->kind = Box;
+            position = 1;
+            specular_color = 1;
+            diffuse_color = 1;
+            ior = 1;
+        } else if (strcmp(value, "cone") == 0) {
+            object_array[object_counter]->kind = Cone;
+            position = 1;
+            specular_color = 1;
+            diffuse_color = 1;
+            ior = 1;
+        } else if (strcmp(value, "eternal_cylinder") == 0) {
+            object_array[object_counter]->kind = EternalCylinder;
             position = 1;
             specular_color = 1;
             diffuse_color = 1;
@@ -439,6 +463,8 @@ int read_scene(char* filename, Object** object_array) {	//Parses json file, and 
                     store_value(object_array[object_counter], Shininess, next_number(json), NULL);
                 }else if(strcmp(key, "thickness") == 0){
                     store_value(object_array[object_counter], Thickness, next_number(json), NULL);
+                }else if(strcmp(key, "angle") == 0){
+                    store_value(object_array[object_counter], Angle, next_number(json), NULL);
                 }else if(strcmp(key, "ior") == 0){
                     store_value(object_array[object_counter], Ior, next_number(json), NULL);
                     ior = 0;

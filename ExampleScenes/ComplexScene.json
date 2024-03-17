@@ -15,11 +15,11 @@
     },
     {
         "type": "box",
-        "dimensions": [0.5, 0.5, 0.5],
+        "dimensions": [0.25, 0.25, 0.25],
         "diffuse_color": [0, 1, 0],
         "specular_color": [1, 1, 1],
-        "position": [-3, 0, 3],
-        "rotation": [-30, 30, 0]
+        "position": [-3, 2, 3],
+        "rotation": [0, 0, 45]
     },
     {
         "type": "donut",
@@ -28,14 +28,32 @@
         "diffuse_color": [0, 0, 1],
         "specular_color": [1, 1, 1],
         "ior": 1,
-        "position": [0, 3, 5]
+        "position": [0, 2.5, 5]
+    },
+    {
+        "type": "eternal_cylinder",
+        "radius": 0.5,
+        "diffuse_color": [0, 0, 1],
+        "specular_color": [1, 1, 1],
+        "ior": 1,
+        "position": [0, 1.5, 5],
+        "rotation": [30, 0, 0]
+    },
+    {
+        "type": "cone",
+        "angle": 10,
+        "height": 500,
+        "diffuse_color": [0, 1, 0],
+        "specular_color": [1, 1, 1],
+        "ior": 1,
+        "position": [-3, 1.4, 3]
     },
     {
         "type": "plane",
         "normal": [0, 1, 0],
         "diffuse_color": [0.5, 0.5, 0.5],
         "specular_color": [1, 1, 1],
-        "position": [0, -1, 0]
+        "position": [0, -3, 0]
     },
     {
         "type": "plane",

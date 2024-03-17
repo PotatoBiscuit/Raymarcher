@@ -7,6 +7,8 @@ typedef enum {
 	Plane,
 	Box,
 	Donut,
+	Cone,
+	EternalCylinder,
 	Mandelbulb,
 	Light
 } Primitive;
@@ -16,7 +18,7 @@ typedef struct {	//Create structure to be used for our object_array
 	double diffuse_color[3];
 	double specular_color[3];
 	double position[3];
-	double rotation[3];
+	double rotation[3]; // In degrees not radians
 	double shininess;
 	double ior;
 	double infinite_interval;
@@ -38,6 +40,13 @@ typedef struct {	//Create structure to be used for our object_array
 		struct {
 			double dimensions[3];
 		} box;
+		struct {
+			double angle; // In degrees not radians
+			double height;
+		} cone;
+		struct {
+			double radius;
+		} eternal_cylinder;
 		struct {
 			// Put any mandelbulb specific fields here
 		} mandelbulb;
@@ -74,6 +83,7 @@ typedef enum {
 	Theta,
 	Shininess,
 	Thickness,
+	Angle,
 	Ior,
 	Infinite_Interval
 } FieldType;

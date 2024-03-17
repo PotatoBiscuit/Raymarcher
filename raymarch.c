@@ -99,6 +99,18 @@ double donut_sdf( double* position, double radius, double thickness ){
 	return magnitude_2D( donut_bounds ) - thickness;
 }
 
+double cone_sdf( double* position, double angle, double height ){
+	double cos_sin[2] = { cos(angle), sin(angle) };
+	double xz[2] = { position[0], position[2] };
+	double q = magnitude_2D( xz );
+	return max( dot_product( cos_sin, (double[2]){ q, position[1] } ), -height - position[1] );
+}
+
+double eternal_cylinder_sdf( double* position, double radius ){
+	double xz[2] = { position[0], position[2] };
+	return magnitude_2D( xz ) - radius;
+}
+
 double mandelbulb_sdf( double* position ){
 	double temp_pos[3] = {position[0], position[1], position[2]};
 
@@ -175,6 +187,19 @@ double all_intersections( double* position, Intersect* intersect ){
 
 		}else if( object_array[parse_count]->kind == Box ){
 			temp_distance = box_sdf( temp_position, object_array[parse_count]->box.dimensions );
+			
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
+			temp_min_distance = min( temp_distance, temp_min_distance );
+
+		}else if( object_array[parse_count]->kind == Cone ){
+			temp_distance = cone_sdf( temp_position, object_array[parse_count]->cone.angle,
+										object_array[parse_count]->cone.height );
+			
+			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
+			temp_min_distance = min( temp_distance, temp_min_distance );
+
+		}else if( object_array[parse_count]->kind == EternalCylinder ){
+			temp_distance = eternal_cylinder_sdf( temp_position, object_array[parse_count]->eternal_cylinder.radius );
 			
 			store_obj_data( temp_distance, temp_min_distance, parse_count, intersect );
 			temp_min_distance = min( temp_distance, temp_min_distance );
