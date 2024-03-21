@@ -9,27 +9,28 @@ void matrix_mult( double input[][3], double num, double result[][3] ){
 }
 
 void matrix_cross_mult( double a[][3], double b[][3], double result[][3] ){
-	for( int i = 0; i < MATRIX_SIZE; i++ ){
-		for( int j = 0; j < MATRIX_SIZE; j++ ){
-			result[i][j] = 0;
-			for( int k = 0; k < MATRIX_SIZE; k++ ){
-				result[i][j] += a[i][k] * b[k][j];
-			}
-		}
-	}
+	result[0][0] = a[0][0] * b[0][0] + a[0][1] * b[1][0] + a[0][2] * b[2][0];
+	result[0][1] = a[0][0] * b[0][1] + a[0][1] * b[1][1] + a[0][2] * b[2][1];
+	result[0][2] = a[0][0] * b[0][2] + a[0][1] * b[1][2] + a[0][2] * b[2][2];
+
+	result[1][0] = a[1][0] * b[0][0] + a[1][1] * b[1][0] + a[1][2] * b[2][0];
+	result[1][1] = a[1][0] * b[0][1] + a[1][1] * b[1][1] + a[1][2] * b[2][1];
+	result[1][2] = a[1][0] * b[0][2] + a[1][1] * b[1][2] + a[1][2] * b[2][2];
+
+	result[2][0] = a[2][0] * b[0][0] + a[2][1] * b[1][0] + a[2][2] * b[2][0];
+	result[2][1] = a[2][0] * b[0][1] + a[2][1] * b[1][1] + a[2][2] * b[2][1];
+	result[2][2] = a[2][0] * b[0][2] + a[2][1] * b[1][2] + a[2][2] * b[2][2];
 }
 
 void matrix_cross_mult_sp( double* a, double b[][3] ){
 	double temp_result[3] = {0.0};
-	for( int i = 0; i < MATRIX_SIZE; i++ ){
-		for( int k = 0; k < MATRIX_SIZE; k++ ){
-			temp_result[i] += a[k] * b[k][i];
-		}
-	}
+	temp_result[0] = a[0] * b[0][0] + a[1] * b[1][0] + a[2] * b[2][0];
+	temp_result[1] = a[0] * b[0][1] + a[1] * b[1][1] + a[2] * b[2][1];
+	temp_result[2] = a[0] * b[0][2] + a[1] * b[1][2] + a[2] * b[2][2];
 
-	for( int i = 0; i < MATRIX_SIZE; i++ ){
-		a[i] = temp_result[i];
-	}
+	a[0] = temp_result[0];
+	a[1] = temp_result[1];
+	a[2] = temp_result[2];
 }
 
 void add_matrices( double a[][3], double b[][3] ){
